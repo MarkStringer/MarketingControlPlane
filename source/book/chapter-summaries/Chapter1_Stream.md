@@ -1,0 +1,10 @@
+1. A **value stream** is the sequence of steps that creates and delivers something valuable to users. :contentReference[oaicite:0]{index=0}  
+2. In manufacturing, value-stream thinking helps identify **waste**, especially delays, waiting, and unused inventory. :contentReference[oaicite:1]{index=1}  
+3. These ideas can help in software, but software is different because it creates **new products**, not repeated copies of an existing one. :contentReference[oaicite:2]{index=2}  
+4. In software projects, the **product value stream does not already exist**; the team has to build it during the project. :contentReference[oaicite:3]{index=3}  
+5. Before any software project starts, there is usually an **idea value stream**: the process by which an idea gains attention, support, and funding. :contentReference[oaicite:4]{index=4}  
+6. The chapter argues that software projects therefore involve **two value streams**: the idea stream and the product stream. :contentReference[oaicite:5]{index=5}  
+7. The **idea value stream is “weird”** because ideas often get funded for emotional or political reasons, not because they have been rigorously tested. :contentReference[oaicite:6]{index=6}  
+8. To deliver real value, teams must **discover what users actually need** and then build a product that meets those needs. :contentReference[oaicite:7]{index=7}  
+9. This usually means **changing the original idea**, which creates tension because the people who backed the idea may feel threatened. :contentReference[oaicite:8]{index=8}  
+10. Successful project management means guiding the team through this difficult gap between dream and reality, especially by learning from users and building something genuinely useful. :contentReference[oaicite:9]{index=9}
