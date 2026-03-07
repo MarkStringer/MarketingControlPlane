@@ -1,0 +1,709 @@
+#!/usr/bin/env python3
+"""
+run_content_scout.py
+
+First-pass content scout for the MarketingControlPlane repo.
+
+What it does:
+- Reads a bounded set of markdown files from the repo
+- Builds a compact context pack
+- Calls the OpenAI Responses API for 3 grounded post candidates
+- Writes candidates into queue/post-candidates/
+- Writes a run log into agent-logs/content-scout/
+
+Usage:
+    python scripts/run_content_scout.py --repo-root .
+    python scripts/run_content_scout.py --repo-root . --count 3 --model gpt-5.4
+    python scripts/run_content_scout.py --repo-root . --dry-run
+
+Environment:
+    OPENAI_API_KEY must be set.
+    OPENAI_MODEL is optional and overrides the default model.
+
+Notes:
+- This script is intentionally conservative: it only writes candidate files and logs.
+- It does not publish anything.
+- It prefers local repo reads over hosted retrieval for this first pass.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import re
+import sys
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Dict, List, Tuple
+
+try:
+    from openai import OpenAI
+except ImportError as exc:
+    raise SystemExit(
+        "The 'openai' package is required. Install it with: pip install openai"
+    ) from exc
+
+
+DEFAULT_MODEL = os.getenv("OPENAI_MODEL", "gpt-5.4")
+
+ALLOWED_CHANNELS = ["linkedin", "x", "blog_newsletter"]
+ALLOWED_RISK = ["low", "medium", "high"]
+ALLOWED_CTA = ["none", "soft", "direct"]
+ALLOWED_TRIGGER_TYPES = ["evergreen", "transcript_led", "show_led", "book_led", "promotional"]
+
+PRIORITY_PATTERNS = [
+    "desired-state/**/*.md",
+    "source/book/metaphors.md",
+    "source/book/key-quotes.md",
+    "source/book/chapter-summaries/**/*.md",
+    "source/book/**/*.md",
+    "source/youtube-transcripts/**/*.md",
+    "source/**/*.md",
+    "observed/posts/**/*.md",
+]
+
+SKIP_PARTS = {
+    ".git",
+    ".github",
+    ".venv",
+    "venv",
+    "__pycache__",
+    "node_modules",
+    "queue",          # do not feed existing queue back in
+    "agent-logs",     # avoid log echo
+    "decisions",      # keep v1 simple
+}
+
+SYSTEM_PROMPT = """
+You are Content Scout for a markdown-based marketing control plane for a book launch.
+
+Your job:
+- Read the supplied repo documents.
+- Produce grounded candidate social posts.
+- Prefer distinctive ideas from the book/transcripts/show over generic project-management commentary.
+- Do not invent quotes.
+- Do not claim you read files that were not supplied.
+- Use plain, vivid language.
+- Each candidate should feel like it comes from the author's actual ideas.
+- One candidate should be evergreen.
+- One candidate should be grounded in transcript/show material.
+- One candidate can be a softer promotional/book-aware post, but keep the CTA restrained unless the context clearly supports it.
+- Novelty matters. If observed posts are present, avoid repeating them too closely.
+- Every candidate must explain why it exists and which source files support it.
+"""
+
+JSON_SCHEMA: Dict[str, Any] = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["run_summary", "documents_used", "candidates"],
+    "properties": {
+        "run_summary": {
+            "type": "string",
+            "description": "Short summary of what this run chose to focus on."
+        },
+        "documents_used": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "Repo-relative paths of the documents actually used."
+        },
+        "candidates": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 6,
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": [
+                    "working_title",
+                    "channel",
+                    "theme",
+                    "metaphors",
+                    "trigger_type",
+                    "risk",
+                    "cta",
+                    "hook",
+                    "draft",
+                    "rationale",
+                    "why_now",
+                    "source_docs",
+                    "source_ideas",
+                    "novelty_note",
+                    "risk_note",
+                ],
+                "properties": {
+                    "working_title": {"type": "string"},
+                    "channel": {"type": "string", "enum": ALLOWED_CHANNELS},
+                    "theme": {"type": "string"},
+                    "metaphors": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                    },
+                    "trigger_type": {"type": "string", "enum": ALLOWED_TRIGGER_TYPES},
+                    "risk": {"type": "string", "enum": ALLOWED_RISK},
+                    "cta": {"type": "string", "enum": ALLOWED_CTA},
+                    "hook": {"type": "string"},
+                    "draft": {"type": "string"},
+                    "rationale": {"type": "string"},
+                    "why_now": {"type": "string"},
+                    "source_docs": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                    },
+                    "source_ideas": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                    },
+                    "novelty_note": {"type": "string"},
+                    "risk_note": {"type": "string"},
+                },
+            },
+        },
+    },
+}
+
+
+@dataclass
+class RepoDoc:
+    path: Path
+    relpath: str
+    meta: Dict[str, Any]
+    body: str
+    excerpt: str
+    score: float
+
+
+def utc_now() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+def slugify(text: str, max_len: int = 48) -> str:
+    text = text.lower().strip()
+    text = re.sub(r"[^a-z0-9]+", "-", text)
+    text = text.strip("-")
+    return text[:max_len] or "untitled"
+
+
+def safe_filename(text: str, prefix: str = "") -> str:
+    slug = slugify(text)
+    return f"{prefix}{slug}.md" if prefix else f"{slug}.md"
+
+
+def compact_whitespace(text: str) -> str:
+    return re.sub(r"[ \t]+", " ", text).strip()
+
+
+def parse_scalar(value: str) -> Any:
+    raw = value.strip()
+    if not raw:
+        return ""
+    if raw.lower() in {"true", "false"}:
+        return raw.lower() == "true"
+    if raw.lower() in {"null", "none"}:
+        return None
+    if re.fullmatch(r"-?\d+", raw):
+        try:
+            return int(raw)
+        except ValueError:
+            return raw
+    if re.fullmatch(r"-?\d+\.\d+", raw):
+        try:
+            return float(raw)
+        except ValueError:
+            return raw
+    if (raw.startswith('"') and raw.endswith('"')) or (raw.startswith("'") and raw.endswith("'")):
+        return raw[1:-1]
+    return raw
+
+
+def parse_frontmatter(text: str) -> Tuple[Dict[str, Any], str]:
+    """
+    Very small frontmatter parser.
+    Supports:
+    ---
+    key: value
+    list_key:
+      - item
+      - item
+    ---
+    """
+    if not text.startswith("---\n"):
+        return {}, text
+
+    end = text.find("\n---\n", 4)
+    if end == -1:
+        return {}, text
+
+    fm_text = text[4:end]
+    body = text[end + 5 :]
+
+    meta: Dict[str, Any] = {}
+    current_list_key: str | None = None
+
+    for line in fm_text.splitlines():
+        if not line.strip():
+            continue
+
+        if re.match(r"^\s*-\s+", line) and current_list_key:
+            item = re.sub(r"^\s*-\s+", "", line).strip()
+            meta.setdefault(current_list_key, []).append(parse_scalar(item))
+            continue
+
+        m = re.match(r"^([A-Za-z0-9_\-]+)\s*:\s*(.*)$", line)
+        if not m:
+            current_list_key = None
+            continue
+
+        key, value = m.group(1), m.group(2)
+        if value == "":
+            meta[key] = []
+            current_list_key = key
+        else:
+            meta[key] = parse_scalar(value)
+            current_list_key = None
+
+    return meta, body
+
+
+def yaml_quote(value: Any) -> str:
+    if value is None:
+        return '""'
+    text = str(value)
+    text = text.replace("\\", "\\\\").replace('"', '\\"')
+    return f'"{text}"'
+
+
+def yaml_list(key: str, values: List[Any]) -> str:
+    lines = [f"{key}:"]
+    if not values:
+        lines.append('  - ""')
+        return "\n".join(lines)
+    for v in values:
+        lines.append(f"  - {yaml_quote(v)}")
+    return "\n".join(lines)
+
+
+def dump_frontmatter(data: Dict[str, Any]) -> str:
+    lines = ["---"]
+    for key, value in data.items():
+        if isinstance(value, list):
+            lines.append(yaml_list(key, value))
+        else:
+            lines.append(f"{key}: {yaml_quote(value)}")
+    lines.append("---")
+    return "\n".join(lines)
+
+
+def should_skip(path: Path) -> bool:
+    return any(part in SKIP_PARTS for part in path.parts)
+
+
+def collect_markdown_files(repo_root: Path) -> List[Path]:
+    seen: set[Path] = set()
+    files: List[Path] = []
+
+    for pattern in PRIORITY_PATTERNS:
+        for path in repo_root.glob(pattern):
+            if path.is_file() and path.suffix.lower() == ".md" and not should_skip(path):
+                if path not in seen:
+                    seen.add(path)
+                    files.append(path)
+
+    return files
+
+
+def compute_score(relpath: str, meta: Dict[str, Any], body: str, path: Path) -> float:
+    score = 0.0
+
+    if relpath.startswith("desired-state/"):
+        score += 1000
+    elif relpath == "source/book/metaphors.md":
+        score += 940
+    elif relpath == "source/book/key-quotes.md":
+        score += 930
+    elif relpath.startswith("source/book/chapter-summaries/"):
+        score += 850
+    elif relpath.startswith("source/book/"):
+        score += 800
+    elif relpath.startswith("source/youtube-transcripts/"):
+        score += 740
+    elif relpath.startswith("source/"):
+        score += 700
+    elif relpath.startswith("observed/posts/"):
+        score += 500
+
+    # Prefer files with more obviously useful metadata.
+    for useful_key in ("title", "date_published", "themes", "book_themes", "topics"):
+        if useful_key in meta:
+            score += 10
+
+    # Mild bonus for substantive content.
+    score += min(len(body), 8000) / 8000 * 20
+
+    # Mild bonus for newer files.
+    try:
+        mtime = path.stat().st_mtime
+        age_days = max((utc_now().timestamp() - mtime) / 86400, 0)
+        score += max(30 - min(age_days, 30), 0) / 3
+    except OSError:
+        pass
+
+    return score
+
+
+def make_excerpt(body: str, max_chars: int = 2600) -> str:
+    text = body.strip()
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    if len(text) <= max_chars:
+        return text
+    return text[:max_chars].rsplit(" ", 1)[0] + " …"
+
+
+def load_repo_docs(repo_root: Path) -> List[RepoDoc]:
+    docs: List[RepoDoc] = []
+
+    for path in collect_markdown_files(repo_root):
+        raw = path.read_text(encoding="utf-8", errors="replace")
+        meta, body = parse_frontmatter(raw)
+        relpath = str(path.relative_to(repo_root)).replace("\\", "/")
+        docs.append(
+            RepoDoc(
+                path=path,
+                relpath=relpath,
+                meta=meta,
+                body=body,
+                excerpt=make_excerpt(body),
+                score=compute_score(relpath, meta, body, path),
+            )
+        )
+
+    docs.sort(key=lambda d: (-d.score, d.relpath))
+    return docs
+
+
+def choose_context_docs(
+    docs: List[RepoDoc],
+    max_docs: int,
+    max_chars: int,
+) -> List[RepoDoc]:
+    chosen: List[RepoDoc] = []
+    total_chars = 0
+
+    # Always include desired-state docs first.
+    desired = [d for d in docs if d.relpath.startswith("desired-state/")]
+    desired.sort(key=lambda d: d.relpath)
+    for doc in desired:
+        if len(chosen) >= max_docs:
+            break
+        if total_chars + len(doc.excerpt) > max_chars:
+            break
+        chosen.append(doc)
+        total_chars += len(doc.excerpt)
+
+    # Then fill with best-scoring remaining docs.
+    for doc in docs:
+        if doc in chosen:
+            continue
+        if len(chosen) >= max_docs:
+            break
+        if total_chars + len(doc.excerpt) > max_chars:
+            continue
+        chosen.append(doc)
+        total_chars += len(doc.excerpt)
+
+    return chosen
+
+
+def render_context(docs: List[RepoDoc]) -> str:
+    chunks = []
+    for doc in docs:
+        chunks.append(
+            "\n".join(
+                [
+                    f"## DOCUMENT: {doc.relpath}",
+                    f"META: {json.dumps(doc.meta, ensure_ascii=False)}",
+                    "EXCERPT:",
+                    doc.excerpt,
+                ]
+            )
+        )
+    return "\n\n".join(chunks)
+
+
+def build_user_prompt(repo_root: Path, docs: List[RepoDoc], count: int) -> str:
+    context = render_context(docs)
+    return f"""
+Repository root: {repo_root}
+
+You are generating candidate posts for a markdown-based marketing control plane.
+
+Requirements:
+- Produce exactly {count} candidates.
+- Ground them in the supplied documents only.
+- Prefer the author's distinctive metaphors, language, and arguments.
+- Keep them useful and specific.
+- Avoid generic "project management thought leadership".
+- Do not fabricate direct quotations unless the wording clearly appears in the supplied excerpts.
+- Use source_docs that actually appear in the supplied context.
+- Keep at least one candidate clearly transcript- or show-led if transcript/show material appears in the context.
+- Keep at least one candidate evergreen.
+- Keep any promotional candidate restrained.
+
+Write for these goals if present in the repo:
+- increase awareness of the book
+- discuss issues from the book in relation to project management, seeing things in different ways, and delivering software
+
+Output only structured JSON matching the schema.
+
+Here is the repo context:
+
+{context}
+""".strip()
+
+
+def call_model(model: str, user_prompt: str) -> Dict[str, Any]:
+    client = OpenAI()
+
+    response = client.responses.create(
+        model=model,
+        input=[
+            {
+                "role": "system",
+                "content": [{"type": "input_text", "text": SYSTEM_PROMPT}],
+            },
+            {
+                "role": "user",
+                "content": [{"type": "input_text", "text": user_prompt}],
+            },
+        ],
+        text={
+            "verbosity": "medium",
+            "format": {
+                "type": "json_schema",
+                "name": "content_scout_output",
+                "schema": JSON_SCHEMA,
+                "strict": True,
+            },
+        },
+    )
+
+    if not getattr(response, "output_text", None):
+        raise RuntimeError(
+            "Model returned no output_text. Check the raw response for refusals or incomplete output."
+        )
+
+    try:
+        return json.loads(response.output_text)
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(
+            f"Model output was not valid JSON:\n{response.output_text}"
+        ) from exc
+
+
+def ensure_dir(path: Path) -> None:
+    path.mkdir(parents=True, exist_ok=True)
+
+
+def normalise_candidate(candidate: Dict[str, Any]) -> Dict[str, Any]:
+    cleaned = dict(candidate)
+
+    cleaned["working_title"] = compact_whitespace(cleaned["working_title"])
+    cleaned["hook"] = cleaned["hook"].strip()
+    cleaned["draft"] = cleaned["draft"].strip()
+    cleaned["rationale"] = cleaned["rationale"].strip()
+    cleaned["why_now"] = cleaned["why_now"].strip()
+    cleaned["novelty_note"] = cleaned["novelty_note"].strip()
+    cleaned["risk_note"] = cleaned["risk_note"].strip()
+
+    cleaned["metaphors"] = [compact_whitespace(m) for m in cleaned.get("metaphors", []) if str(m).strip()]
+    cleaned["source_docs"] = [compact_whitespace(p) for p in cleaned.get("source_docs", []) if str(p).strip()]
+    cleaned["source_ideas"] = [compact_whitespace(i) for i in cleaned.get("source_ideas", []) if str(i).strip()]
+
+    if cleaned["channel"] not in ALLOWED_CHANNELS:
+        cleaned["channel"] = "linkedin"
+    if cleaned["risk"] not in ALLOWED_RISK:
+        cleaned["risk"] = "medium"
+    if cleaned["cta"] not in ALLOWED_CTA:
+        cleaned["cta"] = "soft"
+    if cleaned["trigger_type"] not in ALLOWED_TRIGGER_TYPES:
+        cleaned["trigger_type"] = "evergreen"
+
+    return cleaned
+
+
+def write_candidate_markdown(
+    repo_root: Path,
+    candidate: Dict[str, Any],
+    index: int,
+    run_ts: str,
+) -> Path:
+    queue_dir = repo_root / "queue" / "post-candidates"
+    ensure_dir(queue_dir)
+
+    date_part = utc_now().strftime("%Y-%m-%d")
+    file_slug = slugify(candidate["working_title"])
+    filename = f"post-candidate-{date_part}-{index:03d}-{file_slug}.md"
+    out_path = queue_dir / filename
+
+    frontmatter = {
+        "id": f"post-candidate-{date_part}-{index:03d}",
+        "type": "post_candidate",
+        "status": "awaiting_approval",
+        "channel": candidate["channel"],
+        "theme": candidate["theme"],
+        "metaphors": candidate["metaphors"],
+        "source_docs": candidate["source_docs"],
+        "trigger_type": candidate["trigger_type"],
+        "risk": candidate["risk"],
+        "cta": candidate["cta"],
+        "generated_by": "scripts/run_content_scout.py",
+        "generated_at": run_ts,
+    }
+
+    body = "\n\n".join(
+        [
+            f"# {candidate['working_title']}",
+            "## Hook",
+            candidate["hook"],
+            "## Rationale",
+            candidate["rationale"],
+            "## Draft",
+            candidate["draft"],
+            "## Why now",
+            candidate["why_now"],
+            "## Supporting ideas",
+            "\n".join(f"- {item}" for item in candidate["source_ideas"]) or "-",
+            "## Source docs",
+            "\n".join(f"- {item}" for item in candidate["source_docs"]) or "-",
+            "## Novelty note",
+            candidate["novelty_note"],
+            "## Risk note",
+            candidate["risk_note"],
+            "## Reviewer notes",
+            "- ",
+        ]
+    )
+
+    out_path.write_text(
+        dump_frontmatter(frontmatter) + "\n\n" + body + "\n",
+        encoding="utf-8",
+    )
+    return out_path
+
+
+def write_log_markdown(
+    repo_root: Path,
+    model: str,
+    chosen_docs: List[RepoDoc],
+    result: Dict[str, Any],
+    written_files: List[Path],
+    run_ts: str,
+) -> Path:
+    log_dir = repo_root / "agent-logs" / "content-scout"
+    ensure_dir(log_dir)
+
+    filename = f"content-scout-{run_ts.replace(':', '').replace('-', '')}.md"
+    out_path = log_dir / filename
+
+    frontmatter = {
+        "id": f"content-scout-{run_ts}",
+        "type": "agent_log",
+        "agent": "content_scout",
+        "status": "completed",
+        "model": model,
+        "generated_at": run_ts,
+    }
+
+    body_parts = [
+        "# Summary",
+        result.get("run_summary", "").strip() or "No summary provided.",
+        "## Documents chosen for context",
+        "\n".join(f"- {doc.relpath}" for doc in chosen_docs) or "-",
+        "## Documents reported as used by model",
+        "\n".join(f"- {path}" for path in result.get("documents_used", [])) or "-",
+        "## Candidate files written",
+        "\n".join(f"- {str(path.relative_to(repo_root)).replace(chr(92), '/')}" for path in written_files) or "-",
+        "## Candidate working titles",
+        "\n".join(f"- {c.get('working_title', '').strip()}" for c in result.get("candidates", [])) or "-",
+    ]
+
+    out_path.write_text(
+        dump_frontmatter(frontmatter) + "\n\n" + "\n\n".join(body_parts) + "\n",
+        encoding="utf-8",
+    )
+    return out_path
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Generate grounded post candidates from repo markdown.")
+    parser.add_argument("--repo-root", default=".", help="Path to the repo root.")
+    parser.add_argument("--count", type=int, default=3, help="Number of candidates to ask for.")
+    parser.add_argument("--model", default=DEFAULT_MODEL, help="OpenAI model name.")
+    parser.add_argument("--max-docs", type=int, default=14, help="Maximum number of repo docs to include in context.")
+    parser.add_argument("--max-context-chars", type=int, default=28000, help="Approximate character budget for context excerpts.")
+    parser.add_argument("--dry-run", action="store_true", help="Print results instead of writing files.")
+    return parser.parse_args()
+
+
+def main() -> int:
+    args = parse_args()
+
+    if not os.getenv("OPENAI_API_KEY"):
+        print("OPENAI_API_KEY is not set.", file=sys.stderr)
+        return 2
+
+    repo_root = Path(args.repo_root).resolve()
+    if not repo_root.exists():
+        print(f"Repo root does not exist: {repo_root}", file=sys.stderr)
+        return 2
+
+    docs = load_repo_docs(repo_root)
+    if not docs:
+        print("No markdown files found to build context.", file=sys.stderr)
+        return 1
+
+    chosen_docs = choose_context_docs(
+        docs=docs,
+        max_docs=args.max_docs,
+        max_chars=args.max_context_chars,
+    )
+
+    user_prompt = build_user_prompt(repo_root, chosen_docs, args.count)
+    result = call_model(args.model, user_prompt)
+
+    candidates = [normalise_candidate(c) for c in result.get("candidates", [])]
+    if not candidates:
+        print("Model returned no candidates.", file=sys.stderr)
+        return 1
+
+    run_ts = utc_now().replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+    if args.dry_run:
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+        return 0
+
+    written_files: List[Path] = []
+    for idx, candidate in enumerate(candidates, start=1):
+        written = write_candidate_markdown(repo_root, candidate, idx, run_ts)
+        written_files.append(written)
+
+    log_path = write_log_markdown(
+        repo_root=repo_root,
+        model=args.model,
+        chosen_docs=chosen_docs,
+        result=result,
+        written_files=written_files,
+        run_ts=run_ts,
+    )
+
+    print("Content scout completed.")
+    for path in written_files:
+        print(f"  wrote candidate: {path}")
+    print(f"  wrote log:       {log_path}")
+
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
