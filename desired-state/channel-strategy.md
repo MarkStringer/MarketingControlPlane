@@ -13,6 +13,10 @@ Primary channel for:
 - short essays
 - excerpt-led posts
 - thoughtful replies
+- whacky and provocative posts
+- posts that are dialogues between the author and himself
+- posts that are dialogues with famous people
+- posts that are diaglogues with puppets
 
 ## X
 Use for:
