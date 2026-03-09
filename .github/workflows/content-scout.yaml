@@ -1,6 +1,11 @@
-name: Content Scout
+from pathlib import Path
+
+content = """name: Content Scout
 
 on:
+  push:
+    branches-ignore:
+      - automation/content-scout
   workflow_dispatch:
     inputs:
       count:
@@ -109,3 +114,9 @@ jobs:
         run: |
           echo "PR #${{ steps.cpr.outputs.pull-request-number }}"
           echo "${{ steps.cpr.outputs.pull-request-url }}"
+"""
+
+out = Path("/mnt/data/content-scout-updated.yaml")
+out.write_text(content, encoding="utf-8")
+print(f"Wrote {out}")
+
