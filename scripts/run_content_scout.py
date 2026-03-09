@@ -7,6 +7,7 @@ First-pass content scout for the MarketingControlPlane repo.
 What it does:
 - Reads a bounded set of markdown files from the repo
 - Builds a compact context pack
+- Prioritises recently changed markdown files under source/ as inspiration
 - Calls the OpenAI Responses API for 3 grounded post candidates
 - Writes candidates into queue/post-candidates/
 - Writes a run log into agent-logs/content-scout/
@@ -15,6 +16,7 @@ Usage:
     python scripts/run_content_scout.py --repo-root .
     python scripts/run_content_scout.py --repo-root . --count 3 --model gpt-5.4
     python scripts/run_content_scout.py --repo-root . --dry-run
+    python scripts/run_content_scout.py --repo-root . --ignore-recent-source-changes
 
 Environment:
     OPENAI_API_KEY must be set.
@@ -24,6 +26,7 @@ Notes:
 - This script is intentionally conservative: it only writes candidate files and logs.
 - It does not publish anything.
 - It prefers local repo reads over hosted retrieval for this first pass.
+- It treats recent changes under source/ as higher-priority inspiration.
 """
 
 from __future__ import annotations
@@ -32,6 +35,7 @@ import argparse
 import json
 import os
 import re
+import subprocess
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -92,6 +96,7 @@ Your job:
 - One candidate can be a softer promotional/book-aware post, but keep the CTA restrained unless the context clearly supports it.
 - Novelty matters. If observed posts are present, avoid repeating them too closely.
 - Every candidate must explain why it exists and which source files support it.
+- If recently changed source documents are supplied, treat them as fresh inspiration for at least one candidate when relevant.
 """
 
 JSON_SCHEMA: Dict[str, Any] = {
@@ -313,6 +318,60 @@ def collect_markdown_files(repo_root: Path) -> List[Path]:
     return files
 
 
+def run_git_command(repo_root: Path, args: List[str]) -> str | None:
+    try:
+        result = subprocess.run(
+            ["git", *args],
+            cwd=repo_root,
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return None
+    return result.stdout.strip()
+
+
+def get_changed_source_files(repo_root: Path) -> List[str]:
+    """
+    Return repo-relative markdown files under source/ that changed recently.
+
+    Preference order:
+    1. Diff between HEAD~1 and HEAD (good for push-triggered workflow runs)
+    2. Uncommitted/new files under source/ (good for local runs)
+    """
+    candidates: List[str] = []
+
+    diff_output = run_git_command(repo_root, ["diff", "--name-only", "HEAD~1", "HEAD", "--", "source/"])
+    if diff_output:
+        for line in diff_output.splitlines():
+            relpath = line.strip().replace('\\', '/')
+            if relpath.startswith("source/") and relpath.endswith(".md"):
+                full_path = repo_root / relpath
+                if full_path.is_file() and not should_skip(full_path):
+                    candidates.append(relpath)
+
+    status_output = run_git_command(repo_root, ["status", "--porcelain", "--untracked-files=all", "--", "source/"])
+    if status_output:
+        for line in status_output.splitlines():
+            if len(line) < 4:
+                continue
+            relpath = line[3:].strip().replace('\\', '/')
+            if relpath.startswith("source/") and relpath.endswith(".md"):
+                full_path = repo_root / relpath
+                if full_path.is_file() and not should_skip(full_path):
+                    candidates.append(relpath)
+
+    deduped: List[str] = []
+    seen: set[str] = set()
+    for relpath in candidates:
+        if relpath not in seen:
+            seen.add(relpath)
+            deduped.append(relpath)
+    return deduped
+
+
 def compute_score(relpath: str, meta: Dict[str, Any], body: str, path: Path) -> float:
     score = 0.0
 
@@ -386,9 +445,23 @@ def choose_context_docs(
     docs: List[RepoDoc],
     max_docs: int,
     max_chars: int,
+    changed_source_relpaths: List[str] | None = None,
 ) -> List[RepoDoc]:
     chosen: List[RepoDoc] = []
     total_chars = 0
+    changed_source_relpaths = changed_source_relpaths or []
+
+    def try_add(doc: RepoDoc) -> bool:
+        nonlocal total_chars
+        if doc in chosen:
+            return False
+        if len(chosen) >= max_docs:
+            return False
+        if total_chars + len(doc.excerpt) > max_chars:
+            return False
+        chosen.append(doc)
+        total_chars += len(doc.excerpt)
+        return True
 
     # Always include desired-state docs first.
     desired = [d for d in docs if d.relpath.startswith("desired-state/")]
@@ -396,21 +469,24 @@ def choose_context_docs(
     for doc in desired:
         if len(chosen) >= max_docs:
             break
-        if total_chars + len(doc.excerpt) > max_chars:
+        if not try_add(doc):
             break
-        chosen.append(doc)
-        total_chars += len(doc.excerpt)
+
+    # Then force in recently changed source docs so the model can use them as inspiration.
+    if changed_source_relpaths:
+        changed_lookup = {d.relpath: d for d in docs}
+        changed_docs = [changed_lookup[p] for p in changed_source_relpaths if p in changed_lookup]
+        changed_docs.sort(key=lambda d: (-d.score, d.relpath))
+        for doc in changed_docs:
+            if len(chosen) >= max_docs:
+                break
+            try_add(doc)
 
     # Then fill with best-scoring remaining docs.
     for doc in docs:
-        if doc in chosen:
-            continue
         if len(chosen) >= max_docs:
             break
-        if total_chars + len(doc.excerpt) > max_chars:
-            continue
-        chosen.append(doc)
-        total_chars += len(doc.excerpt)
+        try_add(doc)
 
     return chosen
 
@@ -431,8 +507,25 @@ def render_context(docs: List[RepoDoc]) -> str:
     return "\n\n".join(chunks)
 
 
-def build_user_prompt(repo_root: Path, docs: List[RepoDoc], count: int) -> str:
+def build_user_prompt(
+    repo_root: Path,
+    docs: List[RepoDoc],
+    count: int,
+    changed_source_docs: List[RepoDoc],
+) -> str:
     context = render_context(docs)
+    changed_section = ""
+    if changed_source_docs:
+        changed_lines = "\n".join(f"- {doc.relpath}" for doc in changed_source_docs)
+        changed_section = f"""
+Recently changed source docs (treat these as especially strong inspiration if they are relevant):
+{changed_lines}
+
+Extra rule for this run:
+- At least one candidate should be directly inspired by one or more of the recently changed source docs.
+- Mention those changed source docs in source_docs for the relevant candidate(s).
+"""
+
     return f"""
 Repository root: {repo_root}
 
@@ -454,7 +547,7 @@ Write for these goals if present in the repo:
 - increase awareness of the book
 - discuss issues from the book in relation to project management, seeing things in different ways, and delivering software
 
-Output only structured JSON matching the schema.
+{changed_section}Output only structured JSON matching the schema.
 
 Here is the repo context:
 
@@ -596,6 +689,7 @@ def write_log_markdown(
     repo_root: Path,
     model: str,
     chosen_docs: List[RepoDoc],
+    changed_source_docs: List[RepoDoc],
     result: Dict[str, Any],
     written_files: List[Path],
     run_ts: str,
@@ -618,6 +712,8 @@ def write_log_markdown(
     body_parts = [
         "# Summary",
         result.get("run_summary", "").strip() or "No summary provided.",
+        "## Changed source docs used as inspiration",
+        "\n".join(f"- {doc.relpath}" for doc in changed_source_docs) or "-",
         "## Documents chosen for context",
         "\n".join(f"- {doc.relpath}" for doc in chosen_docs) or "-",
         "## Documents reported as used by model",
@@ -643,6 +739,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-docs", type=int, default=14, help="Maximum number of repo docs to include in context.")
     parser.add_argument("--max-context-chars", type=int, default=28000, help="Approximate character budget for context excerpts.")
     parser.add_argument("--dry-run", action="store_true", help="Print results instead of writing files.")
+    parser.add_argument(
+        "--ignore-recent-source-changes",
+        action="store_true",
+        help="Do not prioritize recently changed markdown files under source/.",
+    )
     return parser.parse_args()
 
 
@@ -663,13 +764,21 @@ def main() -> int:
         print("No markdown files found to build context.", file=sys.stderr)
         return 1
 
+    changed_source_relpaths = []
+    if not args.ignore_recent_source_changes:
+        changed_source_relpaths = get_changed_source_files(repo_root)
+
+    doc_lookup = {doc.relpath: doc for doc in docs}
+    changed_source_docs = [doc_lookup[p] for p in changed_source_relpaths if p in doc_lookup]
+
     chosen_docs = choose_context_docs(
         docs=docs,
         max_docs=args.max_docs,
         max_chars=args.max_context_chars,
+        changed_source_relpaths=changed_source_relpaths,
     )
 
-    user_prompt = build_user_prompt(repo_root, chosen_docs, args.count)
+    user_prompt = build_user_prompt(repo_root, chosen_docs, args.count, changed_source_docs)
     result = call_model(args.model, user_prompt)
 
     candidates = [normalise_candidate(c) for c in result.get("candidates", [])]
@@ -680,7 +789,11 @@ def main() -> int:
     run_ts = utc_now().replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
     if args.dry_run:
-        print(json.dumps(result, indent=2, ensure_ascii=False))
+        dry_run_output = {
+            "recently_changed_source_docs": changed_source_relpaths,
+            "model_output": result,
+        }
+        print(json.dumps(dry_run_output, indent=2, ensure_ascii=False))
         return 0
 
     written_files: List[Path] = []
@@ -692,12 +805,17 @@ def main() -> int:
         repo_root=repo_root,
         model=args.model,
         chosen_docs=chosen_docs,
+        changed_source_docs=changed_source_docs,
         result=result,
         written_files=written_files,
         run_ts=run_ts,
     )
 
     print("Content scout completed.")
+    if changed_source_relpaths:
+        print("  recently changed source docs:")
+        for relpath in changed_source_relpaths:
+            print(f"    - {relpath}")
     for path in written_files:
         print(f"  wrote candidate: {path}")
     print(f"  wrote log:       {log_path}")
