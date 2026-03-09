@@ -111,7 +111,7 @@ Hohl, Philipp, Jil Klünder, Arie van Bennekum, Ryan Lockard, James Gifford, Jü
 
 Johnson, Jim, and Hans Mulder. *Chaos 2020: Beyond Infinity*. Standish Group, 2020.
 
-Johnstone, Keith. *Impro: Improvisation and the Theatre*. London: Faber & Faber, 1979.
+Johnstone, Keith. *Impro: Improvisation and the Theatre*. London: Faber & Faber, 1979. — see `impro-improvisation-and-the-theatre.md`
 
 Johnstone, Keith. *Impro for Storytellers: Theatresports and the Art of Making Things Happen*. London: Faber & Faber, 1998.
 
