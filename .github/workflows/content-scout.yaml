@@ -1,0 +1,112 @@
+name: Content Scout
+
+on:
+  workflow_dispatch:
+    inputs:
+      count:
+        description: "How many post candidates to generate"
+        required: false
+        default: "3"
+        type: string
+      model:
+        description: "OpenAI model to use"
+        required: false
+        default: "gpt-5.4"
+        type: string
+      dry_run:
+        description: "Generate output but do not open a PR"
+        required: false
+        default: false
+        type: boolean
+  schedule:
+    - cron: "0 8 * * 1-5"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: content-scout-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  content-scout:
+    runs-on: ubuntu-latest
+
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_MODEL: ${{ inputs.model || 'gpt-5.4' }}
+      RUN_COUNT: ${{ inputs.count || '3' }}
+      RUN_DRY_RUN: ${{ inputs.dry_run || 'false' }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install openai
+
+      - name: Ensure output directories exist
+        run: |
+          mkdir -p queue/post-candidates
+          mkdir -p agent-logs/content-scout
+
+      - name: Run content scout
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          CMD=(python scripts/run_content_scout.py --repo-root . --count "$RUN_COUNT")
+
+          if [ "$RUN_DRY_RUN" = "true" ]; then
+            CMD+=(--dry-run)
+          fi
+
+          echo "Running: ${CMD[*]}"
+          "${CMD[@]}"
+
+      - name: Show changed files
+        if: ${{ env.RUN_DRY_RUN != 'true' }}
+        run: |
+          git status --short
+          git diff --name-only
+
+      - name: Create pull request
+        if: ${{ env.RUN_DRY_RUN != 'true' }}
+        id: cpr
+        uses: peter-evans/create-pull-request@v8
+        with:
+          commit-message: "Add content scout candidates"
+          branch: automation/content-scout
+          delete-branch: true
+          title: "Content scout: new post candidates"
+          body: |
+            This PR was created automatically by the content scout workflow.
+
+            It adds:
+            - draft post candidates under `queue/post-candidates/`
+            - a run log under `agent-logs/content-scout/`
+
+            Review for:
+            - grounding in source material
+            - novelty versus prior posts
+            - tone and usefulness
+          add-paths: |
+            queue/post-candidates/*.md
+            agent-logs/content-scout/*.md
+
+      - name: Report PR
+        if: ${{ steps.cpr.outputs.pull-request-number }}
+        run: |
+          echo "PR #${{ steps.cpr.outputs.pull-request-number }}"
+          echo "${{ steps.cpr.outputs.pull-request-url }}"
