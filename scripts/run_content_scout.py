@@ -91,7 +91,7 @@ Your job:
 - Do not claim you read files that were not supplied.
 - Use plain, vivid language.
 - Each candidate should feel like it comes from the author's actual ideas.
-- One candidate should be evergreen.
+- One candidate should be wild and crazy 
 - One candidate should be grounded in transcript/show material.
 - One candidate can be a softer promotional/book-aware post, but keep the CTA restrained unless the context clearly supports it.
 - Novelty matters. If observed posts are present, avoid repeating them too closely.
