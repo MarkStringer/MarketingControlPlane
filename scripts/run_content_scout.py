@@ -8,7 +8,8 @@ What it does:
 - Reads a bounded set of markdown files from the repo
 - Builds a compact context pack
 - Prioritises recently changed markdown files under source/ as inspiration
-- Calls the OpenAI Responses API for 3 grounded post candidates
+- Prioritises recently changed markdown files under observed/posts/ as follow-on inspiration
+- Calls the OpenAI Responses API for grounded post candidates
 - Writes candidates into queue/post-candidates/
 - Writes a run log into agent-logs/content-scout/
 
@@ -17,6 +18,7 @@ Usage:
     python scripts/run_content_scout.py --repo-root . --count 3 --model gpt-5.4
     python scripts/run_content_scout.py --repo-root . --dry-run
     python scripts/run_content_scout.py --repo-root . --ignore-recent-source-changes
+    python scripts/run_content_scout.py --repo-root . --ignore-recent-observed-post-changes
 
 Environment:
     OPENAI_API_KEY must be set.
@@ -27,6 +29,7 @@ Notes:
 - It does not publish anything.
 - It prefers local repo reads over hosted retrieval for this first pass.
 - It treats recent changes under source/ as higher-priority inspiration.
+- It treats recent changes under observed/posts/ as prompts for follow-on or adjacent posts.
 """
 
 from __future__ import annotations
@@ -55,7 +58,14 @@ DEFAULT_MODEL = os.getenv("OPENAI_MODEL", "gpt-5.4")
 ALLOWED_CHANNELS = ["linkedin", "x", "blog_newsletter"]
 ALLOWED_RISK = ["low", "medium", "high"]
 ALLOWED_CTA = ["none", "soft", "direct"]
-ALLOWED_TRIGGER_TYPES = ["evergreen", "transcript_led", "show_led", "book_led", "promotional"]
+ALLOWED_TRIGGER_TYPES = [
+    "evergreen",
+    "transcript_led",
+    "show_led",
+    "book_led",
+    "promotional",
+    "follow_on",
+]
 
 PRIORITY_PATTERNS = [
     "desired-state/**/*.md",
@@ -91,8 +101,9 @@ Your job:
 - Do not claim you read files that were not supplied.
 - Use plain, vivid language.
 - Each candidate should feel like it comes from the author's actual ideas.
-- One candidate should be wild and crazy 
+- One candidate should be wild and crazy.
 - One candidate should be grounded in transcript/show material.
+- If recently changed observed/posts documents are supplied, treat them as evidence of what has just been posted and use them to suggest at least one sensible follow-on, sequel, adjacent angle, or next-step post when relevant.
 - One candidate can be a softer promotional/book-aware post, but keep the CTA restrained unless the context clearly supports it.
 - Novelty matters. If observed posts are present, avoid repeating them too closely.
 - Every candidate must explain why it exists and which source files support it.
@@ -188,11 +199,6 @@ def slugify(text: str, max_len: int = 48) -> str:
     text = re.sub(r"[^a-z0-9]+", "-", text)
     text = text.strip("-")
     return text[:max_len] or "untitled"
-
-
-def safe_filename(text: str, prefix: str = "") -> str:
-    slug = slugify(text)
-    return f"{prefix}{slug}.md" if prefix else f"{slug}.md"
 
 
 def compact_whitespace(text: str) -> str:
@@ -333,32 +339,32 @@ def run_git_command(repo_root: Path, args: List[str]) -> str | None:
     return result.stdout.strip()
 
 
-def get_changed_source_files(repo_root: Path) -> List[str]:
+def get_changed_markdown_files(repo_root: Path, prefix: str) -> List[str]:
     """
-    Return repo-relative markdown files under source/ that changed recently.
+    Return repo-relative markdown files under a prefix that changed recently.
 
     Preference order:
     1. Diff between HEAD~1 and HEAD (good for push-triggered workflow runs)
-    2. Uncommitted/new files under source/ (good for local runs)
+    2. Uncommitted/new files under that prefix (good for local runs)
     """
     candidates: List[str] = []
 
-    diff_output = run_git_command(repo_root, ["diff", "--name-only", "HEAD~1", "HEAD", "--", "source/"])
+    diff_output = run_git_command(repo_root, ["diff", "--name-only", "HEAD~1", "HEAD", "--", prefix])
     if diff_output:
         for line in diff_output.splitlines():
-            relpath = line.strip().replace('\\', '/')
-            if relpath.startswith("source/") and relpath.endswith(".md"):
+            relpath = line.strip().replace("\\", "/")
+            if relpath.startswith(prefix) and relpath.endswith(".md"):
                 full_path = repo_root / relpath
                 if full_path.is_file() and not should_skip(full_path):
                     candidates.append(relpath)
 
-    status_output = run_git_command(repo_root, ["status", "--porcelain", "--untracked-files=all", "--", "source/"])
+    status_output = run_git_command(repo_root, ["status", "--porcelain", "--untracked-files=all", "--", prefix])
     if status_output:
         for line in status_output.splitlines():
             if len(line) < 4:
                 continue
-            relpath = line[3:].strip().replace('\\', '/')
-            if relpath.startswith("source/") and relpath.endswith(".md"):
+            relpath = line[3:].strip().replace("\\", "/")
+            if relpath.startswith(prefix) and relpath.endswith(".md"):
                 full_path = repo_root / relpath
                 if full_path.is_file() and not should_skip(full_path):
                     candidates.append(relpath)
@@ -446,10 +452,12 @@ def choose_context_docs(
     max_docs: int,
     max_chars: int,
     changed_source_relpaths: List[str] | None = None,
+    changed_observed_post_relpaths: List[str] | None = None,
 ) -> List[RepoDoc]:
     chosen: List[RepoDoc] = []
     total_chars = 0
     changed_source_relpaths = changed_source_relpaths or []
+    changed_observed_post_relpaths = changed_observed_post_relpaths or []
 
     def try_add(doc: RepoDoc) -> bool:
         nonlocal total_chars
@@ -472,10 +480,20 @@ def choose_context_docs(
         if not try_add(doc):
             break
 
-    # Then force in recently changed source docs so the model can use them as inspiration.
+    # Force in recently changed source docs so the model can use them as inspiration.
     if changed_source_relpaths:
-        changed_lookup = {d.relpath: d for d in docs}
-        changed_docs = [changed_lookup[p] for p in changed_source_relpaths if p in changed_lookup]
+        lookup = {d.relpath: d for d in docs}
+        changed_docs = [lookup[p] for p in changed_source_relpaths if p in lookup]
+        changed_docs.sort(key=lambda d: (-d.score, d.relpath))
+        for doc in changed_docs:
+            if len(chosen) >= max_docs:
+                break
+            try_add(doc)
+
+    # Force in recently changed observed posts so the model can propose follow-on ideas.
+    if changed_observed_post_relpaths:
+        lookup = {d.relpath: d for d in docs}
+        changed_docs = [lookup[p] for p in changed_observed_post_relpaths if p in lookup]
         changed_docs.sort(key=lambda d: (-d.score, d.relpath))
         for doc in changed_docs:
             if len(chosen) >= max_docs:
@@ -512,18 +530,33 @@ def build_user_prompt(
     docs: List[RepoDoc],
     count: int,
     changed_source_docs: List[RepoDoc],
+    changed_observed_post_docs: List[RepoDoc],
 ) -> str:
     context = render_context(docs)
-    changed_section = ""
+
+    changed_source_section = ""
     if changed_source_docs:
         changed_lines = "\n".join(f"- {doc.relpath}" for doc in changed_source_docs)
-        changed_section = f"""
+        changed_source_section = f"""
 Recently changed source docs (treat these as especially strong inspiration if they are relevant):
 {changed_lines}
 
 Extra rule for this run:
 - At least one candidate should be directly inspired by one or more of the recently changed source docs.
 - Mention those changed source docs in source_docs for the relevant candidate(s).
+"""
+
+    changed_observed_posts_section = ""
+    if changed_observed_post_docs:
+        changed_lines = "\n".join(f"- {doc.relpath}" for doc in changed_observed_post_docs)
+        changed_observed_posts_section = f"""
+Recently changed observed posts (treat these as things that have just gone out or have just been updated):
+{changed_lines}
+
+Extra rule for this run:
+- At least one candidate should be a sensible follow-on, sequel, adjacent angle, counterpoint, expansion, or next-step post based on one or more of the recently changed observed posts.
+- Do not simply repeat those posts.
+- Mention the relevant observed post files in source_docs for the follow-on candidate(s).
 """
 
     return f"""
@@ -547,7 +580,9 @@ Write for these goals if present in the repo:
 - increase awareness of the book
 - discuss issues from the book in relation to project management, seeing things in different ways, and delivering software
 
-{changed_section}Output only structured JSON matching the schema.
+{changed_source_section}
+{changed_observed_posts_section}
+Output only structured JSON matching the schema.
 
 Here is the repo context:
 
@@ -690,6 +725,7 @@ def write_log_markdown(
     model: str,
     chosen_docs: List[RepoDoc],
     changed_source_docs: List[RepoDoc],
+    changed_observed_post_docs: List[RepoDoc],
     result: Dict[str, Any],
     written_files: List[Path],
     run_ts: str,
@@ -714,6 +750,8 @@ def write_log_markdown(
         result.get("run_summary", "").strip() or "No summary provided.",
         "## Changed source docs used as inspiration",
         "\n".join(f"- {doc.relpath}" for doc in changed_source_docs) or "-",
+        "## Changed observed posts used for follow-on suggestions",
+        "\n".join(f"- {doc.relpath}" for doc in changed_observed_post_docs) or "-",
         "## Documents chosen for context",
         "\n".join(f"- {doc.relpath}" for doc in chosen_docs) or "-",
         "## Documents reported as used by model",
@@ -744,6 +782,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Do not prioritize recently changed markdown files under source/.",
     )
+    parser.add_argument(
+        "--ignore-recent-observed-post-changes",
+        action="store_true",
+        help="Do not prioritize recently changed markdown files under observed/posts/.",
+    )
     return parser.parse_args()
 
 
@@ -764,21 +807,33 @@ def main() -> int:
         print("No markdown files found to build context.", file=sys.stderr)
         return 1
 
-    changed_source_relpaths = []
+    changed_source_relpaths: List[str] = []
     if not args.ignore_recent_source_changes:
-        changed_source_relpaths = get_changed_source_files(repo_root)
+        changed_source_relpaths = get_changed_markdown_files(repo_root, "source/")
+
+    changed_observed_post_relpaths: List[str] = []
+    if not args.ignore_recent_observed_post_changes:
+        changed_observed_post_relpaths = get_changed_markdown_files(repo_root, "observed/posts/")
 
     doc_lookup = {doc.relpath: doc for doc in docs}
     changed_source_docs = [doc_lookup[p] for p in changed_source_relpaths if p in doc_lookup]
+    changed_observed_post_docs = [doc_lookup[p] for p in changed_observed_post_relpaths if p in doc_lookup]
 
     chosen_docs = choose_context_docs(
         docs=docs,
         max_docs=args.max_docs,
         max_chars=args.max_context_chars,
         changed_source_relpaths=changed_source_relpaths,
+        changed_observed_post_relpaths=changed_observed_post_relpaths,
     )
 
-    user_prompt = build_user_prompt(repo_root, chosen_docs, args.count, changed_source_docs)
+    user_prompt = build_user_prompt(
+        repo_root,
+        chosen_docs,
+        args.count,
+        changed_source_docs,
+        changed_observed_post_docs,
+    )
     result = call_model(args.model, user_prompt)
 
     candidates = [normalise_candidate(c) for c in result.get("candidates", [])]
@@ -791,6 +846,7 @@ def main() -> int:
     if args.dry_run:
         dry_run_output = {
             "recently_changed_source_docs": changed_source_relpaths,
+            "recently_changed_observed_posts": changed_observed_post_relpaths,
             "model_output": result,
         }
         print(json.dumps(dry_run_output, indent=2, ensure_ascii=False))
@@ -806,6 +862,7 @@ def main() -> int:
         model=args.model,
         chosen_docs=chosen_docs,
         changed_source_docs=changed_source_docs,
+        changed_observed_post_docs=changed_observed_post_docs,
         result=result,
         written_files=written_files,
         run_ts=run_ts,
@@ -815,6 +872,10 @@ def main() -> int:
     if changed_source_relpaths:
         print("  recently changed source docs:")
         for relpath in changed_source_relpaths:
+            print(f"    - {relpath}")
+    if changed_observed_post_relpaths:
+        print("  recently changed observed posts:")
+        for relpath in changed_observed_post_relpaths:
             print(f"    - {relpath}")
     for path in written_files:
         print(f"  wrote candidate: {path}")
