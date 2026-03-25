@@ -29,13 +29,20 @@ import math
 import os
 import re
 import sys
-from collections import Counter, defaultdict
+from collections import Counter
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
 from openai import OpenAI
 
 DEFAULT_MODEL = os.getenv("OPENAI_MODEL", "gpt-5.4")
+
+
+def get_openai_client() -> OpenAI:
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        raise RuntimeError("OPENAI_API_KEY is not set.")
+    return OpenAI(api_key=api_key)
 
 
 def parse_args() -> argparse.Namespace:
@@ -106,7 +113,6 @@ def score_text(query_tokens: List[str], text: str) -> float:
         if qt in counts:
             score += 1.0 + math.log1p(counts[qt])
 
-    # phrase-ish boosts
     joined = " ".join(tokens)
     query_joined = " ".join(query_tokens)
     if query_joined and query_joined in joined:
@@ -136,7 +142,6 @@ def rank_edges(
     ranked = []
     for edge in edges:
         base = score_text(qtokens, edge_text(edge, node_by_id))
-        # boost edges touching already-selected nodes
         if edge["from"] in selected_node_ids or edge["to"] in selected_node_ids:
             base += 1.5
         if base > 0:
@@ -163,7 +168,11 @@ def expand_with_neighbors(
     return list(chosen.values())
 
 
-def render_context(nodes: List[Dict[str, Any]], edges: List[Dict[str, Any]], node_by_id: Dict[str, Dict[str, Any]]) -> str:
+def render_context(
+    nodes: List[Dict[str, Any]],
+    edges: List[Dict[str, Any]],
+    node_by_id: Dict[str, Dict[str, Any]],
+) -> str:
     node_lines = []
     for node in nodes:
         node_lines.append(
@@ -210,7 +219,7 @@ def render_context(nodes: List[Dict[str, Any]], edges: List[Dict[str, Any]], nod
 
 
 def ask_model(model: str, question: str, context: str) -> str:
-    client = OpenAI()
+    client = get_openai_client()
     response = client.responses.create(
         model=model,
         instructions=(
@@ -258,6 +267,7 @@ def interactive_loop(
     model: str,
 ) -> None:
     print("Graph question mode. Type 'exit' to quit.\n")
+
     while True:
         try:
             question = input("graph> ").strip()
