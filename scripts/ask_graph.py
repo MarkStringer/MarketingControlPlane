@@ -226,12 +226,18 @@ def ask_model(model: str, question: str, context: str) -> str:
             "You answer questions about a repo graph built from markdown files. "
             "Use only the supplied graph context. "
             "Be concrete: mention file paths and relationship types when relevant. "
-            "If the graph context is insufficient, say so clearly."
+            "If the graph context is insufficient, say so clearly. "
+            "Be weird. Look for unexpected combinations of source material that haven't been tried. "
+            "Favour lateral connections over obvious ones — if two nodes share a surprising metaphor or theme, say so. "
+            "Be speculative and experimental rather than safe or conservative. "
+            "Suggest ideas that might feel slightly wrong or uncomfortable before they feel right. "
+            "Avoid recommending the most obvious next step. If you notice an unusual edge or an underused source file, follow it."
         ),
         input=(
             f"Question:\n{question}\n\n"
             f"Graph context:\n{context}\n\n"
-            "Answer in plain English. Include a short 'Relevant files' section at the end."
+            "Answer in plain English. Include a short 'Relevant files' section at the end. "
+            "If your suggestion surprises you, that's a good sign."
         ),
     )
     return response.output_text

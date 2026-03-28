@@ -6,6 +6,22 @@ date_published: "2026-02-08"
 original_source: "https://markstringer.github.io/"
 imported_from: "single_page_site"
 status: "imported"
+channel: linkedin
+themes:
+  - bad-news-is-data
+  - speaking-truth
+  - project-management
+metaphors:
+  - elephant-in-the-room
+  - bull-elephant-with-tusks
+metrics:
+  date_checked: null
+  impressions: null
+  likes: null
+  comments: null
+  shares: null
+  clicks: null
+  notes: ""
 ---
 
 # Mad shit that happened on a recent project — Part 1: Saying what everyone is thinking

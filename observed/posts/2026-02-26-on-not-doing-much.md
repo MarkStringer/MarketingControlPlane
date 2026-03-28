@@ -6,6 +6,23 @@ date_published: "2026-02-26"
 original_source: "https://markstringer.github.io/"
 imported_from: "single_page_site"
 status: "imported"
+channel: linkedin
+themes:
+  - agreed-activity
+  - project-management
+  - improvisation
+metaphors:
+  - agreed-activity
+  - trouble-salad
+  - pirate-ship
+metrics:
+  date_checked: null
+  impressions: null
+  likes: null
+  comments: null
+  shares: null
+  clicks: null
+  notes: ""
 ---
 
 # On not doing much

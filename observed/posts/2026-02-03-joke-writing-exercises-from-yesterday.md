@@ -6,6 +6,19 @@ date_published: "2026-02-03"
 original_source: "https://markstringer.github.io/"
 imported_from: "single_page_site"
 status: "imported"
+channel: linkedin
+themes:
+  - creative-process
+  - writing-craft
+metaphors: []
+metrics:
+  date_checked: null
+  impressions: null
+  likes: null
+  comments: null
+  shares: null
+  clicks: null
+  notes: ""
 ---
 
 # Joke writing exercises from yesterday

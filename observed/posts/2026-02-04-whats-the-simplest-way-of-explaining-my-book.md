@@ -6,6 +6,22 @@ date_published: "2026-02-04"
 original_source: "https://markstringer.github.io/"
 imported_from: "single_page_site"
 status: "imported"
+channel: linkedin
+themes:
+  - book-explanation
+  - point-of-view
+  - delivering-value
+metaphors:
+  - projects-as-discovery
+  - delivering-impossible
+metrics:
+  date_checked: null
+  impressions: null
+  likes: null
+  comments: null
+  shares: null
+  clicks: null
+  notes: ""
 ---
 
 # What’s the simplest way of explaining my book?

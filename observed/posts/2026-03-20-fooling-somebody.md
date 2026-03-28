@@ -6,6 +6,24 @@ date_published: "2026-03-20"
 original_source: "https://markstringer.github.io/"
 imported_from: "single_page_site"
 status: "imported"
+channel: linkedin
+themes:
+  - writing-craft
+  - shitty-first-draft
+  - bird-by-bird
+metaphors:
+  - fooling-yourself
+  - hypnotising-the-reader
+  - different-kinds-of-fools
+  - one-inch-window
+metrics:
+  date_checked: null
+  impressions: null
+  likes: null
+  comments: null
+  shares: null
+  clicks: null
+  notes: ""
 ---
 
 # Fooling Somebody

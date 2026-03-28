@@ -6,6 +6,21 @@ date_published: "2026-01-25"
 original_source: "https://markstringer.github.io/"
 imported_from: "single_page_site"
 status: "imported"
+channel: linkedin
+themes:
+  - creative-process
+  - show-development
+metaphors:
+  - opera-about-project-management
+  - writing-longhand
+metrics:
+  date_checked: null
+  impressions: null
+  likes: null
+  comments: null
+  shares: null
+  clicks: null
+  notes: ""
 ---
 
 # Art gallery café and an opera about project management
