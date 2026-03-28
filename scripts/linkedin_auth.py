@@ -51,6 +51,7 @@ class CallbackHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(b"<h2>Authenticated! You can close this tab.</h2>")
         else:
+            print(f"Callback received but no code. Full params: {dict(params)}")
             self.send_response(400)
             self.end_headers()
             self.wfile.write(b"<h2>Error: no code returned.</h2>")

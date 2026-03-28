@@ -26,6 +26,15 @@ The script now has a post-punchline section (lines 26-41) that earns the right t
 
 The book connection is now solved at the structural level. The audience knows a book exists, knows roughly what it's about, and the notebook in their hand has the brand on it.
 
+## What's been added (2026-03-28, update 3)
+
+The McCartney passage has been added between "Congratulations — you're now a writer" and "Why do I have any authority to tell you this?"
+
+- Sets up the shitty first draft idea: you don't need exceptional gifts to start, you just need to start
+- Gets a laugh before the more earnest Lamott material
+- Punctures the mythology around creative genius without being preachy — the punchline does the work
+- "I'm going to go out on a limb here" is the comic beat; keep the pause after it
+
 ## What's been added (2026-03-26, update 2)
 
 The show now has explicit content: the Richard Toye framework (see `richard-toye-notes.md`).

@@ -23,6 +23,16 @@ OK, now here's the more brutaller thing. I want you to tell the person whose wor
 
 Congratulations - you're now a writer.
 
+Paul McCartney didn't learn to read music. He was afraid it would interfere with his composing gifts.
+
+That's a reasonable fear if you're Paul McCartney.
+
+If you're not Paul McCartney — and I'm going to go out on a limb here — you'll probably survive learning how a sentence works.
+
+The advice we inherit about creative work mostly comes from people at the extreme tail of human ability. Their quirks get mythologised. But those weren't techniques. They were anxieties that happened to work out.
+
+Just do it. Get better at doing it.
+
 Why do I have any authority to tell you this?
 
 Well, I wrote a book. I wrote one book.

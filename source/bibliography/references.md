@@ -25,6 +25,8 @@ Andreessen, Marc. "Why Software Is Eating the World." *Wall Street Journal*, Aug
 
 Annemann, Theodore. *Practical Mental Magic*. New York: Dover Publications, 1944.
 
+Anschell, Bill. "Careers in Jazz." *All About Jazz*, June 17, 2012. https://www.allaboutjazz.com/careers-in-jazz-by-bill-anschell.
+
 Aristotle. *Prior Analytics*. Translated by Robin Smith. Indianapolis: Hackett Publishing Company, 1989.
 
 Atkinson, Roger. "Project Management: Cost, Time and Quality, Two Best Guesses and a Phenomenon, It's Time to Accept Other Success Criteria." *International Journal of Project Management* 17, no. 6 (1999): 337--42.
