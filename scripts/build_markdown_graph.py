@@ -239,6 +239,8 @@ def infer_node_type(relpath: str) -> str:
         return "candidate_meme"
     if relpath.startswith("queue/experiments/"):
         return "candidate_experiment"
+    if relpath.startswith("queue/actions/"):
+        return "action_item"
 
     if relpath.startswith("decisions/approved/"):
         return "decision_approved"

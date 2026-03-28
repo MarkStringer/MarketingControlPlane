@@ -103,6 +103,7 @@ Each markdown file becomes a node with this shape:
 | node_type | path pattern | description |
 |---|---|---|
 | `candidate_post` | `queue/post-candidates/**` | Post drafts awaiting approval |
+| `action_item` | `queue/actions/**` | Operational tasks (production, marketing, admin) |
 
 ### Observed
 | node_type | path pattern | description |
