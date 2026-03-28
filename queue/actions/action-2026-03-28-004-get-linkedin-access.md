@@ -1,7 +1,7 @@
 ---
 id: action-2026-03-28-004
 type: action_item
-status: todo
+status: done
 category: admin
 priority: high
 due_date: null
