@@ -1,7 +1,7 @@
 ---
 id: "post-candidate-2026-03-11-003"
 type: "post_candidate"
-status: "awaiting_approval"
+status: "superseded"
 channel: "x"
 theme: "Ideas win support easily; products earn value slowly in the real world."
 metaphors:
@@ -83,4 +83,4 @@ Medium risk because the phrasing is intentionally vivid and compressed; although
 
 ## Reviewer notes
 
-- 
+- Superseded by post-candidate-2026-03-29-001-every-project-is-a-drama.md (different angle but covers the same territory more fully; also this was X-only, and we don't post to X)
