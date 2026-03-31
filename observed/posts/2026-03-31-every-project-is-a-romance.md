@@ -5,7 +5,8 @@ title: "Every Project is a Romance (video)"
 date_published: "2026-03-31"
 channel: linkedin
 format: video
-video_url: "https://www.linkedin.com/feed/update/urn:li:ugcPost:7444654501128601600/"
+linkedin_url: "https://www.linkedin.com/feed/update/urn:li:ugcPost:7444654501128601600/"
+video_url: "https://youtube.com/shorts/I4N_X4_uLeA"
 status: published
 related_post_candidate:
 source_docs:
