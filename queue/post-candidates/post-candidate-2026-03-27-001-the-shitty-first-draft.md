@@ -56,7 +56,7 @@ The first draft is supposed to be good. But it won't be. It will be bad. But it 
 
 ---
 
-*You Can Write a Book — Edinburgh Festival Fringe, 17–26 August 2026.*
+*You Can Write a Book — Edinburgh Festival Fringe, 17–29 August 2026 (not Sundays).*
 *Greenside @ Riddles Court, Clover Studio. 18:20, 50 minutes. £10 / £5 concession.*
 
 

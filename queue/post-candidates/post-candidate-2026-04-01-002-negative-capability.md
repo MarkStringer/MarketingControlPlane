@@ -56,7 +56,7 @@ The creative response is: yes, we don't know yet. And that's OK. And we keep goi
 
 ---
 
-*You Can Write a Book — Edinburgh Festival Fringe, 17–26 August 2026.*
+*You Can Write a Book — Edinburgh Festival Fringe, 17–29 August 2026 (not Sundays).*
 *Greenside @ Riddles Court, Clover Studio. 18:20, 50 minutes. £10 / £5 concession.*
 
 ---
