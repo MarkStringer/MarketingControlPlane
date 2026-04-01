@@ -56,6 +56,7 @@ For show-promotion posts, add a **show block** at the bottom after a `---` separ
 Edinburgh Festival Fringe | 17th–29th August (not Sundays)
 Greenside @ Riddles Court, Clover Studio
 18:20 | 50 minutes
+https://www.edfringe.com/tickets/whats-on/you-can-write-a-book
 ```
 
 ---

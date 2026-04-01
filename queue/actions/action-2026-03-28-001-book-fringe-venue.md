@@ -11,4 +11,6 @@ due_date: null
 
 Book the venue for You Can Write a Book at the Edinburgh Festival Fringe, August 2026.
 
-Greenside @ Riddles Court, Clover Studio. 18:20, 50 minutes.
+Greenside @ Riddles Court, Clover Studio. 18:20, 50 minutes. 17–29 August (not Sundays).
+
+https://www.edfringe.com/tickets/whats-on/you-can-write-a-book
