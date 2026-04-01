@@ -1,7 +1,7 @@
 ---
 id: post-candidate-2026-03-28-001
 type: post_candidate
-status: awaiting_approval
+status: done
 channel: linkedin
 theme: craft vs natural talent / learning by doing
 metaphors: [McCartney not reading music, Shakespeare and punctuation]

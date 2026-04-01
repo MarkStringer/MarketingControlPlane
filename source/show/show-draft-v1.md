@@ -33,6 +33,38 @@ The advice we inherit about creative work mostly comes from people at the extrem
 
 Just do it. Get better at doing it.
 
+---
+
+The grammar books come with a certain amount of associated twattery. Eats, Shoots & Leaves. Have You Eaten, Grandma? Strunk and White. Fowler. They're a bit like: when you were learning to drive, you had to put on a morning coat and a black bow tie. And you'd fail your test if you didn't pronounce your H's.
+
+There's something mad about that. Because why do you want to know grammar? You want it so you can write. So you can communicate beyond your local group — the friends and family who know your quirks — to the billion people on the planet who read English but don't.
+
+But here's the thing. A lot of the rules aren't rules.
+
+You can end a sentence with a preposition. You can start a sentence with because. To carelessly split an infinitive is completely fine — that rule was imported from Latin, where you genuinely can't split an infinitive because it's one word. Someone applied it to English, where it makes no sense. It's not a morning coat. It's a top hat. Never required. Exists only to make people feel like they can't write.
+
+The Oxford comma doesn't even have a top hat. It has a top hat, a bow tie, and a butler called George.
+
+The actual short list — the things worth knowing:
+
+Apostrophes. Commas. How to punctuate speech.
+
+Everything else — semi-colons, colons — is like a power drill. You might have cause to get it out of its box and use it twice a year.
+
+That's it. Not because of rules. Because getting them wrong makes your writing harder to read. The reader stumbles. The spell breaks.
+
+[SEX ED TEACHER STORY — see source/show/grammar-for-people-who-arent.md]
+
+The real reason to care about grammar isn't the rules. It's readability.
+
+And here's the weird part. If you get confident writing readable sentences — you might find something that you thought you should have had right from the start, but that kept eluding you.
+
+Your voice.
+
+People treat voice as the prerequisite. The thing you need before you can write. But it might be the other way round. You write your way into it.
+
+---
+
 Why do I have any authority to tell you this?
 
 Well, I wrote a book. I wrote one book.

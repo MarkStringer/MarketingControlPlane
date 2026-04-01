@@ -1,7 +1,7 @@
 ---
 id: post-candidate-2026-03-27-001
 type: post_candidate
-status: awaiting_approval
+status: done
 channel: linkedin
 theme: shitty first drafts / learning by doing
 metaphors: [meadows as rehearsal space, dustbins as low point, the one-night stand-in show]

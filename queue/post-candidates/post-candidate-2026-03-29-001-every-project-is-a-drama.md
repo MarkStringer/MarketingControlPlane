@@ -1,7 +1,7 @@
 ---
 id: post-candidate-2026-03-29-001
 type: post_candidate
-status: awaiting_approval
+status: done
 channel: linkedin
 theme: projects-as-drama
 metaphors: [drama, marriage, ghost-story]
