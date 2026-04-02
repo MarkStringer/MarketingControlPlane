@@ -1,7 +1,7 @@
 ---
 id: post-candidate-2026-04-01-002
 type: post_candidate
-status: todo
+status: published
 channel: youtube
 theme: negative capability / not knowing / writing under uncertainty
 metaphors: [irritable reaching, the blank page as uncertainty, creative response]
