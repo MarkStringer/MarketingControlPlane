@@ -22,9 +22,12 @@ metrics:
 
 # Post text
 
-Prompted by a LinkedIn comment about what's involved in being a project manager — John Keats, negative capability, and why being comfortable with not knowing is essential for both project managers and writers.
+Prompted by a LinkedIn comment about what's involved in being a project manager.
+
+Remembering John Keats' idea of, "negative capability," and why being comfortable with not knowing is essential for both project managers and writers.
 
 "Capable of being in uncertainties, mysteries, doubts without any irritable reaching after fact and reason."
 
-You Can Write a Book — Edinburgh Festival Fringe, 17–29 August 2026 (not Sundays).
-Greenside @ Riddles Court, Clover Studio. 18:20, 50 minutes. £10 / £5 concession.
+You Can Write a Book — Edinburgh Festival Fringe,
+17–29 August 2026 (not Sundays).
+Greenside @ Riddles Court, Clover Studio. 18:20, 50 minutes.
