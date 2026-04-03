@@ -10,6 +10,10 @@ status: deposit_paid
 
 Booked accommodation for Edinburgh Fringe 2026 on 2026-04-03.
 
+## Dates
+
+16–30 August 2026
+
 ## Payment
 
 - Total cost: £820
