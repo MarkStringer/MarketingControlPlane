@@ -37,6 +37,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import random
 import re
 import subprocess
 import sys
@@ -47,13 +48,17 @@ from typing import Any, Dict, List, Tuple
 
 try:
     from openai import OpenAI
-except ImportError as exc:
-    raise SystemExit(
-        "The 'openai' package is required. Install it with: pip install openai"
-    ) from exc
+except ImportError:
+    OpenAI = None  # type: ignore
+
+try:
+    from anthropic import Anthropic
+except ImportError:
+    Anthropic = None  # type: ignore
 
 
-DEFAULT_MODEL = os.getenv("OPENAI_MODEL", "gpt-5.4")
+DEFAULT_OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o")
+DEFAULT_ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-6")
 
 ALLOWED_CHANNELS = ["linkedin", "x", "blog_newsletter"]
 ALLOWED_RISK = ["low", "medium", "high"]
@@ -590,11 +595,12 @@ Here is the repo context:
 """.strip()
 
 
-def call_model(model: str, user_prompt: str) -> Dict[str, Any]:
+def call_openai(user_prompt: str) -> Dict[str, Any]:
+    if OpenAI is None:
+        raise RuntimeError("openai package is not installed.")
     client = OpenAI()
-
     response = client.responses.create(
-        model=model,
+        model=DEFAULT_OPENAI_MODEL,
         input=[
             {
                 "role": "system",
@@ -606,7 +612,6 @@ def call_model(model: str, user_prompt: str) -> Dict[str, Any]:
             },
         ],
         text={
-            "verbosity": "medium",
             "format": {
                 "type": "json_schema",
                 "name": "content_scout_output",
@@ -615,18 +620,58 @@ def call_model(model: str, user_prompt: str) -> Dict[str, Any]:
             },
         },
     )
-
     if not getattr(response, "output_text", None):
         raise RuntimeError(
-            "Model returned no output_text. Check the raw response for refusals or incomplete output."
+            "OpenAI returned no output_text. Check the raw response for refusals or incomplete output."
         )
-
     try:
         return json.loads(response.output_text)
     except json.JSONDecodeError as exc:
-        raise RuntimeError(
-            f"Model output was not valid JSON:\n{response.output_text}"
-        ) from exc
+        raise RuntimeError(f"OpenAI output was not valid JSON:\n{response.output_text}") from exc
+
+
+def call_anthropic(user_prompt: str) -> Dict[str, Any]:
+    if Anthropic is None:
+        raise RuntimeError("anthropic package is not installed.")
+    client = Anthropic()
+    response = client.messages.create(
+        model=DEFAULT_ANTHROPIC_MODEL,
+        max_tokens=4096,
+        system=SYSTEM_PROMPT,
+        tools=[
+            {
+                "name": "content_scout_output",
+                "description": "Output structured post candidates.",
+                "input_schema": JSON_SCHEMA,
+            }
+        ],
+        tool_choice={"type": "tool", "name": "content_scout_output"},
+        messages=[{"role": "user", "content": user_prompt}],
+    )
+    tool_use = next((b for b in response.content if b.type == "tool_use"), None)
+    if tool_use is None:
+        raise RuntimeError("Anthropic returned no tool_use block. Check the raw response.")
+    return tool_use.input
+
+
+def call_model(user_prompt: str) -> tuple[Dict[str, Any], str]:
+    has_openai = bool(os.getenv("OPENAI_API_KEY")) and OpenAI is not None
+    has_anthropic = bool(os.getenv("ANTHROPIC_API_KEY")) and Anthropic is not None
+
+    if has_openai and has_anthropic:
+        provider = random.choice(["openai", "anthropic"])
+    elif has_openai:
+        provider = "openai"
+    elif has_anthropic:
+        provider = "anthropic"
+    else:
+        raise RuntimeError("Neither OPENAI_API_KEY nor ANTHROPIC_API_KEY is set.")
+
+    print(f"  provider selected: {provider}")
+    if provider == "openai":
+        return call_openai(user_prompt), provider
+    else:
+        return call_anthropic(user_prompt), provider
 
 
 def ensure_dir(path: Path) -> None:
@@ -722,7 +767,7 @@ def write_candidate_markdown(
 
 def write_log_markdown(
     repo_root: Path,
-    model: str,
+    provider: str,
     chosen_docs: List[RepoDoc],
     changed_source_docs: List[RepoDoc],
     changed_observed_post_docs: List[RepoDoc],
@@ -741,7 +786,7 @@ def write_log_markdown(
         "type": "agent_log",
         "agent": "content_scout",
         "status": "completed",
-        "model": model,
+        "provider": provider,
         "generated_at": run_ts,
     }
 
@@ -773,7 +818,6 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate grounded post candidates from repo markdown.")
     parser.add_argument("--repo-root", default=".", help="Path to the repo root.")
     parser.add_argument("--count", type=int, default=3, help="Number of candidates to ask for.")
-    parser.add_argument("--model", default=DEFAULT_MODEL, help="OpenAI model name.")
     parser.add_argument("--max-docs", type=int, default=14, help="Maximum number of repo docs to include in context.")
     parser.add_argument("--max-context-chars", type=int, default=28000, help="Approximate character budget for context excerpts.")
     parser.add_argument("--dry-run", action="store_true", help="Print results instead of writing files.")
@@ -793,8 +837,8 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
 
-    if not os.getenv("OPENAI_API_KEY"):
-        print("OPENAI_API_KEY is not set.", file=sys.stderr)
+    if not os.getenv("OPENAI_API_KEY") and not os.getenv("ANTHROPIC_API_KEY"):
+        print("Neither OPENAI_API_KEY nor ANTHROPIC_API_KEY is set.", file=sys.stderr)
         return 2
 
     repo_root = Path(args.repo_root).resolve()
@@ -834,7 +878,7 @@ def main() -> int:
         changed_source_docs,
         changed_observed_post_docs,
     )
-    result = call_model(args.model, user_prompt)
+    result, provider = call_model(user_prompt)
 
     candidates = [normalise_candidate(c) for c in result.get("candidates", [])]
     if not candidates:
@@ -859,7 +903,7 @@ def main() -> int:
 
     log_path = write_log_markdown(
         repo_root=repo_root,
-        model=args.model,
+        provider=provider,
         chosen_docs=chosen_docs,
         changed_source_docs=changed_source_docs,
         changed_observed_post_docs=changed_observed_post_docs,
