@@ -250,8 +250,8 @@ def ask_claude(prompt: str) -> str:
     return message.content[0].text.strip()
 
 
-def ask_model(prompt: str) -> Tuple[str, str]:
-    """Ask a randomly selected available model. Returns (provider, response)."""
+def ask_model(prompt: str, provider_override: Optional[str] = None) -> Tuple[str, str]:
+    """Ask a randomly selected available model, with fallback. Returns (provider, response)."""
     available = []
     if os.environ.get("OPENAI_API_KEY"):
         available.append("openai")
@@ -260,11 +260,24 @@ def ask_model(prompt: str) -> Tuple[str, str]:
     if not available:
         raise RuntimeError("Neither OPENAI_API_KEY nor ANTHROPIC_API_KEY is set.")
 
-    provider = random.choice(available)
-    if provider == "openai":
-        return "openai", ask_openai(prompt)
+    if provider_override:
+        order = [provider_override] + [p for p in available if p != provider_override]
     else:
-        return "claude", ask_claude(prompt)
+        order = available[:]
+        random.shuffle(order)
+
+    last_err: Optional[Exception] = None
+    for provider in order:
+        try:
+            if provider == "openai":
+                return "openai", ask_openai(prompt)
+            else:
+                return "claude", ask_claude(prompt)
+        except Exception as e:
+            print(f"Provider {provider} failed: {e}", file=sys.stderr)
+            last_err = e
+
+    raise RuntimeError(f"All providers failed. Last error: {last_err}")
 
 
 # ---------------------------------------------------------------------------
@@ -337,6 +350,12 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Generate suggestions even if the change is not material",
     )
+    parser.add_argument(
+        "--provider",
+        choices=["openai", "claude"],
+        default=None,
+        help="Force a specific provider (default: random, with fallback)",
+    )
     return parser.parse_args()
 
 
@@ -391,7 +410,7 @@ def main() -> int:
 
     prompt = build_prompt(delta, before_summary, after_summary)
     print("Asking model for book suggestions ...", file=sys.stderr)
-    provider, suggestions = ask_model(prompt)
+    provider, suggestions = ask_model(prompt, provider_override=args.provider)
 
     out_path = write_output(repo_root, delta, suggestions, provider, since)
     print(f"Written to {out_path.relative_to(repo_root)}")
