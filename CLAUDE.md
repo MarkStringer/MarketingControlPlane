@@ -32,6 +32,16 @@ Every agent run that creates or modifies files must end with a push to origin/ma
 | `agent-logs/` | Per-agent run logs |
 | `desired-state/` | Strategic goals and constraints |
 | `decisions/` | Approved decisions |
+| `queue/reading-candidates/` | Book suggestions generated from graph change detection |
+
+## Knowledge graph
+
+When answering questions about the content graph, connections between ideas, posts, replies, or source material, read the following files at the repo root before responding:
+
+- `graph_schema.md` — schema and structure of the graph
+- `graph_editor_commands.md` — available commands for editing the graph
+
+These files describe how the graph is built and what it contains.
 
 ## Author voice
 
