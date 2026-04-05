@@ -1,7 +1,7 @@
 ---
 id: reply-candidate-2026-04-05-001
 type: reply_candidate
-status: awaiting_approval
+status: posted
 platform: linkedin
 stance: extend
 risk: low
