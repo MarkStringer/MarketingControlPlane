@@ -13,6 +13,7 @@ source_docs:
   - "source/book/chapter-summaries/Chapter10_Some.md"
   - "desired-state/message-house.md"
   - "desired-state/launch-goals.md"
+  - "source/youtubeTranscripts/biscuit-tin-explainer-2026-04-05.md"
 trigger_type: "evergreen"
 risk: "low"
 cta: "none"
@@ -24,33 +25,35 @@ generated_at: "2026-03-11T18:28:39Z"
 
 ## Hook
 
-A spec is not software in the same way a biscuit tin is not the biscuit.
+I got this idea from reading about Gödel's Incompleteness Theorem. Descriptions of things and things are made of different stuff. Different substrate. And that difference causes problems in almost every project.
 
 ## Rationale
 
-This is a strong evergreen post rooted in a distinctive book argument rather than generic PM advice. It uses the book's specific language around exact match, asymmetry, and the biscuit metaphor to make a memorable point about software delivery.
+This is a strong evergreen post rooted in a distinctive book argument rather than generic PM advice. Updated to include the Gödel origin (makes it intellectual and harder to dismiss), the substrate framing, and the organisational point from the 2026-04-05 video: organisations are structurally set up to deal with descriptions, not working things.
 
 ## Draft
 
-One reason software projects go strange is that people treat the description as if it were the thing.
+I got this idea from a book about Gödel's Incompleteness Theorem — a book I had no real business reading.
 
-A diagram starts to feel like the product.
-A specification starts to feel like delivery.
-An approved idea starts to feel like value already banked.
+The point it was making is that numbers and descriptions of numbers are made of different stuff. Different substrate.
 
-But the map is never the territory.
+The same is true of software projects.
 
-That is why stakeholders get upset when teams talk about trade-offs, learning, and partial delivery. In their heads, the project already exists as an exact match. Anything less feels like failure.
+A diagram is not the product. A specification is not delivery. The early working version of something is not the thing you imagined — it has its own rules, its own properties, its own ways of being stored and changed and used.
 
-A better way to think is asymmetrically:
-- some, not all
-- useful now, not perfect later
-- working software, not just persuasive description
-- inexact match, not fantasy match
+The biscuit tin is not the biscuit. You can't eat the description.
 
-Good delivery is often the art of helping people let go of the imaginary complete thing so they can see the real useful thing.
+This causes a specific kind of damage. Stakeholders get upset when teams talk about trade-offs and partial delivery because in their heads the project already exists, complete and perfect. The description felt like value already banked. Anything less feels like failure.
 
-That shift in point of view is where projects become more deliverable.
+But here is the part that is harder to fix: organisations are generally set up to deal with descriptions, not working things. They have governance for plans. Approvals for specs. Meetings about diagrams. What they often lack is the capacity to deal with something real — which is initially disappointing, which requires attuning, which doesn't yet deliver everything it was imagined to deliver.
+
+Good delivery is partly the art of helping people let go of the imaginary complete thing so they can see the real useful thing in front of them.
+
+That is a harder shift than it sounds.
+
+## Why now
+
+Useful at any time because it addresses a recurring delivery failure mode: confusing plans and descriptions with working value. Updated with organisational angle, which is the sharpest new point.
 
 ## Why now
 
