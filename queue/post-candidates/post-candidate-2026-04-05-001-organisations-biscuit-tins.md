@@ -1,7 +1,7 @@
 ---
 id: "post-candidate-2026-04-05-001"
 type: "post_candidate"
-status: "awaiting_approval"
+status: "posted"
 channel: "linkedin"
 theme: "Organisations are structured to manage descriptions, not working things — and this is why delivery is hard."
 metaphors:
