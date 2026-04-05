@@ -172,6 +172,13 @@ Rules:
 - Prefer books that bridge the themes in unexpected ways.
 - Be specific about *why* the graph change makes this book relevant now.
 - Do not suggest books already in the repo's source material.
+- At least one suggestion must be a genuine wildcard. This means: a book that nobody would
+  expect to appear on this list, from a field that seems completely unrelated
+  (e.g. mycology, military logistics, liturgical music, epidemiology, competitive chess,
+  animal behaviour, medieval history, structural engineering). The connection to the delta
+  must be real and specific — not a metaphor stretched thin, but a structural or conceptual
+  overlap that genuinely illuminates the themes. Aim to surprise yourself. If the wildcard
+  feels safe or obvious, pick something weirder. Label it "Wildcard:".
 """
 
 
@@ -208,7 +215,7 @@ def build_prompt(delta: Dict[str, Any], before: Dict[str, Any], after: Dict[str,
     for t, c in top_after:
         lines.append(f"  {t}: {c}")
 
-    lines.append("\nBased on this, suggest 4–6 books Mark should read next.")
+    lines.append("\nBased on this, suggest 4–6 books Mark should read next. At least one must be a Wildcard from an unexpected field.")
     return "\n".join(lines)
 
 
