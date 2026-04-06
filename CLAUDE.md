@@ -43,6 +43,16 @@ When answering questions about the content graph, connections between ideas, pos
 
 These files describe how the graph is built and what it contains.
 
+## LinkedIn scouting
+
+Daily Google search to find LinkedIn posts to reply to — use today's date for both bounds:
+
+```
+site:linkedin.com/posts "project management" after:YYYY-MM-DD before:YYYY-MM-DD+1
+```
+
+Example for 2026-04-06: `site:linkedin.com/posts "project management" after:2026-04-05 before:2026-04-07`
+
 ## Author voice
 
 Mark Stringer — author of *Delivering the Impossible* (Springer). Signature phrases: "bad news is data", "all projects are swamps", "the project is a bet", "point of view is worth 80 IQ points", "deliver the possible, not the fantasy."
