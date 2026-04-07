@@ -21,7 +21,9 @@ Note: Date-bounded search returned mostly older posts (2022–2024 vintage). Sup
 
 - **Jordan Cutler — "Estimates are not deadlines. They get treated like them though."** ([link](https://www.linkedin.com/posts/jordancutler1_estimates-are-not-deadlines-they-get-treated-activity-7153423230517596160-zM79)) — SELECTED: useful communication fix (t-shirt sizing) that misses the structural cause; Mark can add the "project is a bet" structural layer.
 
-- **Ogaga Johnson — "Project Management in 2026: AI, Hybrid Skills, and..."** ([link](https://www.linkedin.com/posts/ogagajohnson_ogagajohnson-projectmanagement-careergrowth-activity-7408884162205585408-HgsR)) — REJECTED: listicle/prediction format; the core "think like leaders, not task managers" claim is too generic to add something structurally non-obvious.
+- **Ogaga Johnson — "Project Management in 2026: AI, Hybrid Skills, and..."** ([link](https://www.linkedin.com/posts/ogagajohnson_ogagajohnson-projectmanagement-careergrowth-activity-7408884162205585408-HgsR)) — SELECTED (run 2): "leader not task manager" claim; Mark can name the specific courage required — truth-telling about the plan when the sponsor is invested.
+
+- **Guy Thorpe — "3 PM mistakes I made early"** ([link](https://www.linkedin.com/posts/guy-thorpe_3-project-management-mistakes-i-made-early-activity-7427080260896071680-Duxo)) — SELECTED (run 2): orchestration-over-expertise point needs structural extension; pure orchestration without domain awareness creates dependency.
 
 - **IPMA — Global Project Profession Forum 2026 posts (×4)** ([example](https://www.linkedin.com/posts/ipma-international-project-management-association_ipma-ppf2026-projectmanagement-activity-7428357748427460608-5YiL)) — REJECTED: institutional conference promotional content; no specific claim to engage with.
 
@@ -38,9 +40,12 @@ Note: Date-bounded search returned mostly older posts (2022–2024 vintage). Sup
 - `reply-candidate-2026-04-07-001-ravaln-scope-understanding.md` — extends Neal R.'s reframe with the commitments-vs-understanding structural observation.
 - `reply-candidate-2026-04-07-002-hildick-scope-no.md` — counterpoints Hildick's "say no" advice with the project-as-bet framing.
 - `reply-candidate-2026-04-07-003-cutler-estimates-deadlines.md` — extends Cutler's communication fix with the structural reason estimates become deadlines.
+- `reply-candidate-2026-04-07-002-thorpe-pm-mistakes-orchestration.md` — extends Thorpe's orchestration point: pure orchestration without domain awareness creates dependency; the skill is the calibrated question.
+- `reply-candidate-2026-04-07-003-johnson-pm-2026-leadership.md` — reframes Johnson's "leader not task manager": the hard thing is truth-telling about the plan, not facilitation. Uses "point of view is worth 80 IQ points."
 
 # Notes
 
-- All three selected posts are some months old (2022–2024 range); engagement should be verified before posting.
-- Scope/estimates/uncertainty cluster reflects available posts today; no recent high-engagement posts on other PM themes were found.
+- All selected posts are some months old (2021–2026 range); engagement should be verified before posting. No posts confirmed from April 6–7 2026 despite multiple search strategies.
+- Scope/estimates/uncertainty cluster from run 1; leadership-framing and orchestration from run 2.
 - Themes avoided per recent replies: bad-news-is-data (used 2026-04-02), negative-capability/uncertainty-tolerance (used 2026-04-01), team-dynamics/psychological-safety (used 2026-04-03).
+- Duplicate Hildick file from run 2 removed; `002-hildick-scope-no.md` from run 1 is the canonical Hildick candidate.
