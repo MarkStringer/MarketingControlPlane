@@ -68,9 +68,16 @@ generate_poster() {
     -background none -rotate -45 +repage \
     "$WIP_TAG"
 
-  # Step 3: Composite WIP tag
+  # Step 3: QR code (navy on yellow, links to Eventbrite)
+  local QR_IMG=/tmp/wip_qr.png
+  qrencode -o "$QR_IMG" -s 5 -m 2 \
+    --foreground=1a237e --background=FFD700 \
+    "https://www.eventbrite.com/e/you-can-write-a-book-tickets-1986985842142?aff=erellivmlt"
+
+  # Step 4: Composite WIP tag (bottom right) and QR code (bottom left)
   convert "$POSTER_BASE" \
     "$WIP_TAG" -gravity NorthWest -geometry +749+1149 -composite \
+    "$QR_IMG"  -gravity SouthWest -geometry +20+20   -composite \
     "$OUTPUT"
 
   echo "Written: $OUTPUT"
