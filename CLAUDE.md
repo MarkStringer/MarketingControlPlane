@@ -53,6 +53,23 @@ site:linkedin.com/posts "project management" after:YYYY-MM-DD before:YYYY-MM-DD+
 
 Example for 2026-04-06: `site:linkedin.com/posts "project management" after:2026-04-05 before:2026-04-07`
 
+## Blog
+
+When asked to post something to the blog, add it to `../MarkStringer.github.io/index.markdown`.
+
+The blog is a single-page Jekyll site. New posts are inserted as the **second** entry — after the introductory section (name, photo, and contact details, ending with the first `---` divider) but before any existing posts.
+
+Each post follows this structure:
+1. `<a id="..."></a>` anchor
+2. `## Weekday Nth Month Year` date heading
+3. `## Title` heading
+4. Content (image or video thumbnail, then prose)
+5. `---` divider
+6. Fringe show footer (italicised, with link)
+7. `---` divider
+
+The blog repo uses `master` (not `main`). Push with `git push -u origin master`.
+
 ## Author voice
 
 Mark Stringer — author of *Delivering the Impossible* (Springer). Signature phrases: "bad news is data", "all projects are swamps", "the project is a bet", "point of view is worth 80 IQ points", "deliver the possible, not the fantasy."
