@@ -19,6 +19,8 @@ Why Mark has something useful to add.
 # Draft reply
 Write the proposed reply here.
 
+Of course I'm replying to these posts to market my book - search "Mark Stringer Delivering the Impossible"
+
 # Grounding
 - 
 
