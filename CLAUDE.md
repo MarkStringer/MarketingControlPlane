@@ -48,10 +48,8 @@ These files describe how the graph is built and what it contains.
 Daily Google search to find LinkedIn posts to reply to:
 
 ```
-site:linkedin.com/posts "project management" after:[today]
+https://www.google.com/search?q=site:linkedin.com/posts+"project+management"&tbs=qdr:d
 ```
-
-Substitute `[today]` with today's date in `YYYY-MM-DD` format before running the search.
 
 ## Blog
 
