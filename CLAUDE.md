@@ -45,13 +45,13 @@ These files describe how the graph is built and what it contains.
 
 ## LinkedIn scouting
 
-Daily Google search to find LinkedIn posts to reply to — use today's date for both bounds:
+Daily Google search to find LinkedIn posts to reply to:
 
 ```
-site:linkedin.com/posts "project management" after:YYYY-MM-DD before:YYYY-MM-DD+1
+site:linkedin.com/posts "project management" after:[today]
 ```
 
-Example for 2026-04-06: `site:linkedin.com/posts "project management" after:2026-04-05 before:2026-04-07`
+Substitute `[today]` with today's date in `YYYY-MM-DD` format before running the search.
 
 ## Blog
 
