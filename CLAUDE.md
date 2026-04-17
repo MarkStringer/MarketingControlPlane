@@ -73,3 +73,5 @@ The blog repo uses `master` (not `main`). Push with `git push -u origin master`.
 Mark Stringer — author of *Delivering the Impossible* (Springer). Signature phrases: "bad news is data", "all projects are swamps", "the project is a bet", "point of view is worth 80 IQ points", "deliver the possible, not the fantasy."
 
 Reply style: direct, sometimes dry, no hashtags, no em-dashes, no bullet points unless genuinely needed, ends with a point not a question.
+
+**All written content — posts, replies, blog entries — must follow the style guide at `source/mark-stringer-style-guide.md` by default.** Read it before drafting anything.
