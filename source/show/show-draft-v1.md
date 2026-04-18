@@ -63,6 +63,11 @@ Your voice.
 
 People treat voice as the prerequisite. The thing you need before you can write. But it might be the other way round. You write your way into it.
 
+I went to a workshop where a published author and an agent were giving feedback on the first lines of people's novels. Someone asked about writing style — the kind of question I'd assumed had no useful answer. She just said: "Tell me a story."
+
+Because if you're doing that - like you were telling your mates a story down the pub, or you're telling a child a story, or you're explaining to the police why you were found leaning over the body with the knife in your hand - well, then, even if you're writing in the first person, you're not really thinking about yourself. You're thinking about the story, not yourself.
+
+And if you're thinking about telling a story, you might find out that you are doing that in a voice — you probably have a way of telling stories.
 ---
 
 Why do I have any authority to tell you this?
