@@ -61,6 +61,7 @@ SKIP_PARTS = {
     "__pycache__",
     "node_modules",
     "graph",
+    "graphify-out",
 }
 
 THEME_FIELDS = ["themes", "book_themes", "topics"]
@@ -559,18 +560,9 @@ def build_edges(nodes: Dict[str, Node], bodies: Dict[str, str]) -> List[Edge]:
                     ),
                 )
 
-            # same_channel_as
-            if a.channel and b.channel and a.channel == b.channel:
-                add_edge(
-                    edges,
-                    make_edge(
-                        a.id,
-                        "same_channel_as",
-                        b.id,
-                        0.45,
-                        {"method": "channel_match", "shared_values": [a.channel]},
-                    ),
-                )
+            # No same_channel_as edge: channel is already a queryable node property,
+            # and linking every pair that shares one forms O(n^2) cliques (it was ~70%
+            # of all edges) that drown out the signal edges during traversal/retrieval.
 
     return list(edges.values())
 
