@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAG: Two Explanations</title>
+<style>
+:root {
+  --ink: #1a1a1a;
+  --muted: #5b6470;
+  --rule: #e3e6ea;
+  --accent: #0a66c2;
+  --code-bg: #f5f7f9;
+  --code-ink: #24292f;
+  --table-head: #f0f3f6;
+  --max: 820px;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  color: var(--ink);
+  background: #fbfcfd;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+  font-size: 18px;
+  line-height: 1.65;
+}
+.wrap { max-width: var(--max); margin: 0 auto; padding: 64px 24px 120px; }
+h1, h2, h3 { line-height: 1.25; font-weight: 700; letter-spacing: -0.01em; }
+h1 {
+  font-size: 2.4rem; margin: 0 0 0.4em; padding-bottom: 0.3em;
+  border-bottom: 3px solid var(--ink);
+}
+h2 {
+  font-size: 1.55rem; margin: 2.6em 0 0.6em; padding-top: 0.6em;
+  border-top: 1px solid var(--rule);
+}
+h3 { font-size: 1.2rem; margin: 2em 0 0.5em; color: #2b2b2b; }
+p { margin: 0.9em 0; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+strong { font-weight: 700; }
+hr { border: 0; border-top: 1px solid var(--rule); margin: 2.4em 0; }
+ul, ol { padding-left: 1.4em; margin: 0.9em 0; }
+li { margin: 0.4em 0; }
+li > ul, li > ol { margin: 0.3em 0; }
+code {
+  font-family: "SF Mono", "JetBrains Mono", "Fira Code", ui-monospace,
+    SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.86em; background: var(--code-bg); color: var(--code-ink);
+  padding: 0.12em 0.4em; border-radius: 4px; border: 1px solid var(--rule);
+}
+pre {
+  background: var(--code-bg); border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent); border-radius: 6px;
+  padding: 16px 18px; overflow-x: auto; line-height: 1.5; margin: 1.2em 0;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 0.8rem; color: var(--code-ink); }
+table { width: 100%; border-collapse: collapse; margin: 1.4em 0; font-size: 0.92rem; }
+th, td { text-align: left; padding: 9px 14px; border: 1px solid var(--rule); vertical-align: top; }
+th { background: var(--table-head); font-weight: 700; }
+tbody tr:nth-child(even) { background: #fafbfc; }
+@media (max-width: 600px) {
+  body { font-size: 16px; }
+  .wrap { padding: 40px 18px 80px; }
+  h1 { font-size: 1.9rem; }
+  h2 { font-size: 1.35rem; }
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+<h1>RAG: Two Explanations</h1>
+<p>Two answers on Retrieval-Augmented Generation, compiled from our conversation. The first explains what RAG is from first principles; the second explains how it fits with knowledge graphs, grounded in this repo's <code>scripts/ask_graph.py</code>.</p>
+<hr>
+<h2>1. What RAG is</h2>
+<p>RAG stands for <strong>Retrieval-Augmented Generation</strong>. It's a technique for making a language model answer using <em>specific information it wasn't trained on</em> — your documents, your database, your repo — by fetching the relevant material at question time and putting it into the prompt.</p>
+<p><strong>The problem it solves.</strong> A language model only knows two things: what it absorbed during training (frozen, general, and with a cutoff date), and whatever you type into the prompt right now. So out of the box it can't answer "what does <em>our</em> cadence policy say about bad-news posts?" — that's not in its training. And if you force it to, it tends to <strong>hallucinate</strong>: invent a plausible-sounding answer. RAG fixes this by feeding the model the actual source text before it answers.</p>
+<p><strong>The mechanism — three steps.</strong> The name itself is the recipe:</p>
+<ol>
+<li><strong>Retrieval.</strong> Take the user's question, search some external knowledge store for the most relevant pieces of text, and pull back the top handful. The search is usually <em>semantic</em>: documents are pre-converted into <strong>embeddings</strong> (vectors that capture meaning), the question is embedded the same way, and you return the chunks whose vectors are closest. ("Semantic" matters: it matches on meaning, so "bad news" can retrieve a passage about "delivering unwelcome project updates" even with no shared words.)</li>
+<li><strong>Augmentation.</strong> Paste those retrieved chunks into the prompt as context — literally "Here is some background:\n\n[retrieved text]\n\nNow answer this question: ...".</li>
+<li><strong>Generation.</strong> The model writes its answer, <strong>grounded in the supplied text</strong> rather than its own memory. A good RAG prompt also instructs it to use <em>only</em> the provided context and to say "I don't know" if the answer isn't there.</li>
+</ol>
+<p><strong>What it's actually doing, in one line:</strong> turning a closed-book exam into an open-book one. The model stops reciting from memory and starts reading from the page you handed it.</p>
+<p><strong>Why people use it instead of alternatives:</strong></p>
+<ul>
+<li>vs. <strong>fine-tuning</strong> (retraining the model on your data): RAG is cheaper, and you can update the knowledge instantly by changing the documents — no retraining.</li>
+<li>vs. <strong>dumping everything into the prompt</strong>: even huge context windows are finite and expensive; retrieval sends only the relevant slice.</li>
+<li>It gives <strong>citations</strong> — because you know which chunks you retrieved, you can show the source, which makes answers checkable.</li>
+</ul>
+<p><strong>Its limits:</strong> the answer is only as good as the retrieval. If the search misses the right chunk, the model can't use it; if it retrieves junk, the answer degrades. And it answers from isolated retrieved snippets, so it's weak on questions that require connecting facts across many documents — which is exactly the gap a <strong>knowledge graph</strong> fills (GraphRAG, below). But that's a refinement of the retrieval step, not a change to the core idea.</p>
+<p>Concretely in your repo: <code>scripts/ask_graph.py</code> is RAG. It retrieves relevant nodes and edges from your graph (the "R"), pastes them into the prompt as context (the "A"), and asks the model to answer using only that (the "G").</p>
+<hr>
+<h2>2. How RAG fits with knowledge graphs</h2>
+<p>This one fits <em>tightly</em>, and your repo already does it: <code>scripts/ask_graph.py</code> is a small GraphRAG engine. Let me use it to explain.</p>
+<p><strong>Plain RAG</strong> is: chunk your documents → embed them as vectors → at question time, retrieve the top-k most <em>similar</em> chunks → stuff them in the prompt → let the model answer. Its weakness is that it retrieves <strong>isolated chunks by similarity</strong>. It has no idea that chunk A <em>grounds</em> chunk B, it can't follow a chain of reasoning across documents, and it can't answer "what is this whole corpus about?" because no single chunk contains that.</p>
+<p><strong>A knowledge graph fixes exactly those gaps.</strong> It contributes two things to retrieval:</p>
+<ol>
+<li><strong>The relationships become retrievable context, not just the text.</strong> You feed the model "A <code>grounds</code> B", "cadence <code>constrains</code> this post" — the typed edges themselves — alongside the node summaries.</li>
+<li><strong>Neighbour expansion / multi-hop.</strong> Once you've found a relevant node, you follow its edges to pull in connected nodes that a pure similarity search would have missed.</li>
+</ol>
+<p>You can watch both happen in <code>answer_question</code> (ask_graph.py:246):</p>
+<ul>
+<li><code>rank_nodes</code> (line 256) — find the <strong>seed</strong> nodes that match the question. <em>(This is the "retrieval" step. Note it's lexical keyword scoring, line 105, not vector embeddings — so it's a simplified RAG, but the shape is identical.)</em></li>
+<li><code>rank_edges</code> (line 260) — score edges, with a <strong>+1.5 boost for any edge touching a seed node</strong> (line 145). The relationships get pulled in deliberately.</li>
+<li><code>expand_with_neighbors</code> (line 263) — <strong>this is the graph-specific move.</strong> It walks the top edges and adds the nodes on the <em>other end</em>, even though those nodes never matched the question's keywords. That's the multi-hop reach plain RAG lacks.</li>
+<li><code>render_context</code> (line 171) — serialises a <code>NODES:</code> block <strong>and an <code>EDGES:</code> block</strong> with <code>type</code>, <code>weight</code>, and <code>evidence</code>. The model receives the graph structure, not a bag of chunks.</li>
+<li><code>ask_model</code> (line 221) — restricts the model to that context.</li>
+</ul>
+<p>So the answer to "how does RAG fit": <strong>a knowledge graph is a better retrieval substrate for RAG.</strong> Vector RAG retrieves <em>things that look alike</em>; GraphRAG retrieves <em>things that are connected</em>, plus the named connections themselves.</p>
+<p>Two directions worth keeping straight, because your repo shows both:</p>
+<ul>
+<li><strong>Graph improves RAG</strong> (retrieval) — <code>ask_graph.py</code>, above.</li>
+<li><strong>RAG-style extraction builds the graph</strong> — the semantic <code>graphify-out/</code> layer uses an LLM to <em>read</em> documents and emit the nodes and edges in the first place. The inverse relationship.</li>
+</ul>
+<p>And the piece your repo has but <code>ask_graph.py</code> doesn't yet exploit: for <strong>global</strong> questions ("what are the main themes across everything?"), full GraphRAG (e.g. Microsoft's variant) retrieves pre-computed <strong>community summaries</strong> rather than chunks. Your <code>GRAPH_REPORT.md</code> already detects the 56 communities and the god nodes — so the raw material for that upgrade is sitting there. The honest caveats on the current script: retrieval is keyword-based (swapping in embeddings would sharpen it) and it expands only one hop (true multi-hop traversal would let it answer deeper chains).</p>
+</main>
+</body>
+</html>
