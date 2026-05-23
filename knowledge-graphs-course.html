@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Knowledge Graphs: A Working Course</title>
+<style>
+:root {
+  --ink: #1a1a1a;
+  --muted: #5b6470;
+  --rule: #e3e6ea;
+  --accent: #0a66c2;
+  --code-bg: #f5f7f9;
+  --code-ink: #24292f;
+  --table-head: #f0f3f6;
+  --max: 820px;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  color: var(--ink);
+  background: #fbfcfd;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+  font-size: 18px;
+  line-height: 1.65;
+}
+.wrap {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 64px 24px 120px;
+}
+h1, h2, h3 { line-height: 1.25; font-weight: 700; letter-spacing: -0.01em; }
+h1 {
+  font-size: 2.4rem;
+  margin: 0 0 0.4em;
+  padding-bottom: 0.3em;
+  border-bottom: 3px solid var(--ink);
+}
+h2 {
+  font-size: 1.55rem;
+  margin: 2.6em 0 0.6em;
+  padding-top: 0.6em;
+  border-top: 1px solid var(--rule);
+}
+h3 { font-size: 1.2rem; margin: 2em 0 0.5em; color: #2b2b2b; }
+p { margin: 0.9em 0; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+strong { font-weight: 700; }
+hr {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: 2.4em 0;
+}
+ul, ol { padding-left: 1.4em; margin: 0.9em 0; }
+li { margin: 0.4em 0; }
+li > ul, li > ol { margin: 0.3em 0; }
+code {
+  font-family: "SF Mono", "JetBrains Mono", "Fira Code", ui-monospace,
+    SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.86em;
+  background: var(--code-bg);
+  color: var(--code-ink);
+  padding: 0.12em 0.4em;
+  border-radius: 4px;
+  border: 1px solid var(--rule);
+}
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  padding: 16px 18px;
+  overflow-x: auto;
+  line-height: 1.5;
+  margin: 1.2em 0;
+}
+pre code {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: 0.8rem;
+  color: var(--code-ink);
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.4em 0;
+  font-size: 0.92rem;
+}
+th, td {
+  text-align: left;
+  padding: 9px 14px;
+  border: 1px solid var(--rule);
+  vertical-align: top;
+}
+th { background: var(--table-head); font-weight: 700; }
+tbody tr:nth-child(even) { background: #fafbfc; }
+blockquote {
+  margin: 1.2em 0;
+  padding: 0.2em 1.1em;
+  color: var(--muted);
+  border-left: 3px solid var(--rule);
+}
+.subtle { color: var(--muted); font-size: 0.85rem; }
+@media (max-width: 600px) {
+  body { font-size: 16px; }
+  .wrap { padding: 40px 18px 80px; }
+  h1 { font-size: 1.9rem; }
+  h2 { font-size: 1.35rem; }
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+<h1 id="knowledge-graphs-a-working-course">Knowledge Graphs: A Working Course</h1>
+<p>A practical course on the most important aspects of knowledge graphs, grounded in a real example: the graph that already lives in this repository. Every abstract idea below is illustrated with concrete nodes and edges from <code>graph/nodes.ndjson</code> and <code>graph/edges.ndjson</code>, so you can read the theory and then go look at the thing itself.</p>
+<p>Roughly 4,000 words. Read it top to bottom once; after that, treat the section headings as a reference.</p>
+<hr>
+<h2 id="1-what-a-knowledge-graph-actually-is">1. What a knowledge graph actually is</h2>
+<p>A knowledge graph is a way of representing information as a network of <strong>things</strong> and the <strong>relationships between them</strong>, rather than as rows in a table or paragraphs in a document.</p>
+<p>That sounds simple, and the simplicity is the point. Three modelling choices make a graph different from the data structures you already know:</p>
+<ol>
+<li><strong>Things are first-class.</strong> Each entity — a book, a post, a person, a concept, a file — is a distinct object with its own identity. You can point at it, attach facts to it, and ask what it connects to.</li>
+<li><strong>Relationships are first-class too.</strong> The link between two things is not buried inside a foreign key or implied by a paragraph. It is an explicit object with its own type and, often, its own properties. "Post A <em>responds to</em> external post B" is a thing you can store, query, and count.</li>
+<li><strong>The structure is the data.</strong> In a spreadsheet, meaning lives in the cells. In a knowledge graph, a large part of the meaning lives in the <em>shape</em> of the connections. Which node has the most edges? Which node sits between two otherwise-separate clusters? Those structural facts are answers to real questions.</li>
+</ol>
+<p>This repo is a good teaching case because it is not a toy. It is a "marketing control plane" for an author marketing a book (<em>Delivering the Impossible</em>) and an Edinburgh Fringe show (<em>You Can Write a Book</em>). Every markdown file — source material, drafted posts, published posts, replies, strategy documents, agent logs — becomes a node, and the meaningful relationships between those files become edges. The result currently holds <strong>157 nodes and 843 edges</strong> in the deterministic graph, and a richer semantic layer with hundreds more.</p>
+<p>The reason to build it is stated plainly in <code>graph_schema.md</code>: to answer questions that are painful to answer against a pile of files, such as <em>"what source material grounds this candidate post?"</em>, <em>"which themes or metaphors are overused?"</em>, and <em>"which source files have never turned into a post?"</em> Those are all relationship questions. A folder of files cannot answer them; a graph can.</p>
+<hr>
+<h2 id="2-the-atomic-unit-nodes-edges-and-triples">2. The atomic unit: nodes, edges, and triples</h2>
+<p>Strip a knowledge graph down to its smallest meaningful statement and you get a <strong>triple</strong>: <em>subject — predicate — object</em>. Two things and the named relationship between them.</p>
+<p>In this repo the format is written exactly that way in the schema:</p>
+<pre><code>(from_node) -[EDGE_TYPE]-&gt; (to_node)
+</code></pre>
+<p>A real edge from the data:</p>
+<pre><code class="language-json">{
+  &quot;from&quot;: &quot;node:desired-state/cadence.md&quot;,
+  &quot;to&quot;:   &quot;node:queue/post-candidates/post-candidate-2026-03-27-002-bad-news-is-data-not-disloyalty.md&quot;,
+  &quot;type&quot;: &quot;constrains&quot;,
+  &quot;weight&quot;: 0.95,
+  &quot;evidence&quot;: {&quot;method&quot;: &quot;default_control_plane_rule&quot;}
+}
+</code></pre>
+<p>Read it as a sentence: <em>the cadence rules constrain this bad-news post candidate.</em> That single triple is the whole graph in miniature. Stack up hundreds of these statements and you have a network you can traverse and reason over.</p>
+<p>Two properties of edges matter from the very start:</p>
+<ul>
+<li><strong>Edges are directed.</strong> <code>constrains</code> points <em>from</em> the strategy <em>to</em> the post, not the other way around. Direction encodes meaning: "grounds" runs from source to post, "published_as" runs from a draft to the thing it became. Reverse the arrow and you change the claim.</li>
+<li><strong>Edges are typed.</strong> The relationship is not a vague "related to". It is <code>constrains</code>, or <code>grounds</code>, or <code>responds_to</code>. The type tells you <em>how</em> two things relate, which is usually more valuable than the bare fact that they relate at all.</li>
+</ul>
+<p>A graph made only of untyped, undirected links is just a web. A <em>knowledge</em> graph earns the word "knowledge" because its edges carry meaning.</p>
+<hr>
+<h2 id="3-nodes-carry-properties-not-just-identity">3. Nodes carry properties, not just identity</h2>
+<p>A node is more than a name. Each node here is a structured record. From <code>graph_schema.md</code>, the shape of a node is:</p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;node:source/book/metaphors.md&quot;,
+  &quot;path&quot;: &quot;source/book/metaphors.md&quot;,
+  &quot;node_type&quot;: &quot;source_metaphor_index&quot;,
+  &quot;title&quot;: &quot;Metaphors&quot;,
+  &quot;status&quot;: &quot;draft&quot;,
+  &quot;tags&quot;: [&quot;metaphors&quot;, &quot;book&quot;, &quot;source&quot;],
+  &quot;themes&quot;: [&quot;ways_of_seeing&quot;, &quot;swamp&quot;, &quot;bets&quot;],
+  &quot;metaphors&quot;: [&quot;swamp&quot;, &quot;bets&quot;, &quot;pirate_ships&quot;],
+  &quot;channel&quot;: null,
+  &quot;date_published&quot;: null,
+  &quot;summary&quot;: &quot;Index of core metaphors from the book.&quot;
+}
+</code></pre>
+<p>Those fields — <code>themes</code>, <code>metaphors</code>, <code>status</code>, <code>channel</code>, <code>date_published</code> — are the node's <strong>properties</strong> (also called attributes). They do two jobs.</p>
+<p>First, they let you <strong>filter and group</strong> without traversing edges at all: "show me every node where <code>status</code> is <code>draft</code>", or "every node published on the LinkedIn <code>channel</code>".</p>
+<p>Second, and more interestingly, properties are the <em>raw material from which edges get derived</em>. If two different files both list <code>swamp</code> in their <code>metaphors</code> array, a build step can create a <code>same_metaphor_as</code> edge between them automatically. The property on the node becomes a relationship in the graph. This is one of the central tricks of graph construction: lift shared attributes up into explicit connections so you can traverse them.</p>
+<p>This style — nodes and edges that both carry arbitrary key/value properties — is called the <strong>property graph</strong> model. It is the model used by tools like Neo4j, and it is what this repo uses. (The other major model, RDF, is covered in Section 11.)</p>
+<hr>
+<h2 id="4-the-schema-ontology-the-contract-that-makes-a-graph-legible">4. The schema (ontology): the contract that makes a graph legible</h2>
+<p>If every node and edge invented its own vocabulary, the graph would be unsearchable. The <strong>schema</strong> — in graph circles often called the <strong>ontology</strong> — is the agreed list of node types and edge types. It is the contract that says "these are the kinds of things that exist, and these are the kinds of relationships allowed between them."</p>
+<p>This repo's schema defines a controlled vocabulary of node types, each tied to where the file lives:</p>
+<table>
+<thead>
+<tr>
+<th>node_type</th>
+<th>what it is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>source_document</code></td>
+<td>book chapters, keynote and video transcripts</td>
+</tr>
+<tr>
+<td><code>source_chapter_summary</code></td>
+<td>per-chapter summaries of the book</td>
+</tr>
+<tr>
+<td><code>source_metaphor_index</code></td>
+<td>the index of the book's core metaphors</td>
+</tr>
+<tr>
+<td><code>candidate_post</code> / <code>candidate_reply</code></td>
+<td>drafts awaiting approval</td>
+</tr>
+<tr>
+<td><code>observed_post</code> / <code>observed_reply</code></td>
+<td>things actually published</td>
+</tr>
+<tr>
+<td><code>desired_goal</code>, <code>desired_cadence</code>, <code>desired_audience</code>, …</td>
+<td>strategy and constraints</td>
+</tr>
+<tr>
+<td><code>action_item</code></td>
+<td>operational tasks</td>
+</tr>
+<tr>
+<td><code>log_content_scout</code>, <code>log_reply_scout</code>, …</td>
+<td>per-agent run logs</td>
+</tr>
+</tbody>
+</table>
+<p>And a controlled vocabulary of edge types, each with a precise meaning:</p>
+<table>
+<thead>
+<tr>
+<th>edge_type</th>
+<th>meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>grounds</code></td>
+<td>source material directly supports a candidate post</td>
+</tr>
+<tr>
+<td><code>informs</code></td>
+<td>source material shapes strategy</td>
+</tr>
+<tr>
+<td><code>constrains</code></td>
+<td>strategy limits or shapes queue/observed content</td>
+</tr>
+<tr>
+<td><code>same_theme_as</code></td>
+<td>two nodes share a theme</td>
+</tr>
+<tr>
+<td><code>same_metaphor_as</code></td>
+<td>two nodes use the same metaphor</td>
+</tr>
+<tr>
+<td><code>published_as</code></td>
+<td>a candidate became an observed post</td>
+</tr>
+<tr>
+<td><code>responds_to</code></td>
+<td>a reply responds to an external post</td>
+</tr>
+</tbody>
+</table>
+<p>The discipline here is the lesson. A good ontology is <strong>small enough to remember and rich enough to be useful</strong>. Ten edge types is plenty for this domain; a hundred would be unmanageable and inconsistently applied. When you design your own graph, the hardest and most valuable work is usually this: deciding what counts as a node, what counts as an edge, and what each name precisely means. Get the ontology right and everything downstream — extraction, querying, analytics — becomes tractable. Get it wrong and you spend forever reconciling synonyms.</p>
+<p>A practical note visible in the live data: real graphs always contain a generic escape hatch. Here it is the <code>markdown_document</code> node type, used for files like <code>CLAUDE.md</code> and <code>README.md</code> that do not fit a specific category. Every ontology needs a way to admit "this is a node, but I haven't classified it precisely yet" — otherwise you either lose data or force bad classifications.</p>
+<hr>
+<h2 id="5-identity-stable-ids-and-entity-resolution">5. Identity: stable IDs and entity resolution</h2>
+<p>A graph is only coherent if "the book" is <em>one</em> node that everything points to, not five near-duplicates. This is the <strong>identity</strong> problem, and it is where many graph projects quietly fail.</p>
+<p>This repo solves the easy half with <strong>stable, deterministic IDs</strong>. Every node's id is derived from its file path: <code>node:source/book/metaphors.md</code>. Edge ids are derived from their endpoints and type: <code>edge:node:desired-state/cadence.md-&gt;constrains-&gt;node:...</code>. Because the id is a pure function of the path, rebuilding the graph from scratch produces the same ids, so the graph is reproducible and diffable in git. The schema calls this out as a goal: "easy to diff, easy to rebuild." Deterministic identity is what makes that possible.</p>
+<p>The hard half is <strong>entity resolution</strong> (also called deduplication or record linkage): deciding when two differently-named things are actually the same thing. You can see the seam in this repo's richer semantic layer. The graph report lists <em>both</em> <code>Delivering the Impossible (Book)</code> with 21 edges <em>and another</em> <code>Delivering the Impossible (Book)</code> with 16 edges as separate "god nodes." Those are almost certainly the same book, split into two nodes because they were extracted from different files under slightly different names. That split is the single most common defect in real knowledge graphs: the same entity fragmented across several nodes, so its connections are scattered and its true importance is understated.</p>
+<p>Two takeaways. First, file-path identity is robust precisely because it is mechanical — there is no judgement involved. Second, the moment you start extracting <em>concepts</em> (not files) as nodes, you inherit the resolution problem, and you need a deliberate strategy: canonical names, alias tables, or a similarity threshold that merges near-duplicates. Identity is not a detail; it is a foundation.</p>
+<hr>
+<h2 id="6-building-a-graph-deterministic-extraction-vs-semantic-enrichment">6. Building a graph: deterministic extraction vs. semantic enrichment</h2>
+<p>Where do the nodes and edges come from? This repo is an unusually clear example because it has <strong>two layers</strong>, and understanding the contrast teaches you the whole landscape of graph construction.</p>
+<p><strong>Layer one — the deterministic builder (<code>scripts/build_markdown_graph.py</code>).</strong> This walks the repo, turns every markdown file into a node, and derives edges from rules. It reads YAML frontmatter to populate properties, infers <code>node_type</code> from the file path, and creates edges from concrete signals: shared <code>themes</code> produce <code>same_theme_as</code> edges, shared <code>metaphors</code> produce <code>same_metaphor_as</code>, an explicit <code>source_docs</code> list produces <code>grounds</code> edges, strategy files <code>constrain</code> queue files via default rules. This layer is <strong>mechanical, fast, free, and perfectly reproducible</strong>. Run it twice, get the same graph. Its edges are trustworthy because each one traces to an explicit rule — note the <code>"evidence": {"method": "default_control_plane_rule"}</code> stamped on every edge.</p>
+<p>The edge-type distribution in the current graph shows what rule-based extraction produces in practice:</p>
+<pre><code>596  same_channel_as     &lt;- everything on the same channel links to everything else
+132  same_theme_as
+ 26  informs
+ 26  constrains
+ 19  grounds
+  8  same_metaphor_as
+</code></pre>
+<p>That <code>same_channel_as</code> count is itself a lesson (see Section 9): a rule that links <em>every</em> pair sharing an attribute explodes combinatorially and can drown out the signal. Mechanical extraction is reliable but not automatically <em>wise</em>.</p>
+<p><strong>Layer two — semantic extraction (the <code>graphify-out/</code> output).</strong> A second pipeline uses a language model to read the <em>content</em> of files and extract finer-grained nodes and edges — not "file A links to file B" but "the <em>concept</em> <code>Bad News is Data</code> is referenced by these eight posts and contradicts that one." This produces a far richer graph (the report mentions on the order of 835 nodes and 1,195 edges) including concepts, people, and quotes that never had their own file. The report labels each extracted relationship: <strong>89% EXTRACTED</strong> (read directly from text) versus <strong>11% INFERRED</strong> (reasoned by the model), with the inferred edges carrying an average confidence of 0.82.</p>
+<p>The two layers represent the fundamental trade-off in graph construction:</p>
+<ul>
+<li><strong>Rule-based / deterministic:</strong> precise, cheap, reproducible, auditable — but it only finds relationships you already knew how to look for, and it misses everything implicit in prose.</li>
+<li><strong>Model-based / semantic:</strong> finds rich, surprising, human-meaningful connections — but it costs tokens, is non-deterministic, and produces some edges that are wrong and must be marked, scored, and verified.</li>
+</ul>
+<p>Mature systems use both: deterministic structure as the trustworthy skeleton, semantic extraction as the enrichment layer, with provenance recorded so you always know which is which.</p>
+<hr>
+<h2 id="7-provenance-every-edge-should-know-where-it-came-from">7. Provenance: every edge should know where it came from</h2>
+<p>Notice that both layers attach <strong>evidence</strong> to their edges. The deterministic edges carry <code>"method": "default_control_plane_rule"</code>. The semantic edges carry an <code>EXTRACTED</code> / <code>INFERRED</code> label and a confidence score.</p>
+<p>This is <strong>provenance</strong>, and it is one of the most underrated aspects of a serious knowledge graph. A graph is a giant pile of assertions, and not all assertions are equally trustworthy. Some are facts read directly from a file; some are a model's educated guess. If you cannot tell which is which, you cannot trust the graph for anything that matters, and you cannot improve it because you cannot tell good edges from bad.</p>
+<p>The discipline to adopt: <strong>never store a bare edge.</strong> Store the edge plus <em>how you know</em> — the rule that fired, the source span, the model and confidence. When someone later asks "is this connection real?", provenance is the difference between an answer and a shrug. The repo's own graph report leans on this directly, surfacing questions like <em>"Are the 13 inferred relationships involving <code>Bad News is Data</code> actually correct?"</em> — a question you can only ask because the inferred edges were tagged as inferred.</p>
+<hr>
+<h2 id="8-querying-and-traversal-why-a-graph-beats-a-join">8. Querying and traversal: why a graph beats a join</h2>
+<p>Here is the practical payoff. Once information is a graph, the questions that were awkward become natural, because you answer them by <strong>walking edges</strong>.</p>
+<p><strong>One hop.</strong> "What grounds this post?" Stand on the post node, follow <code>grounds</code> edges backward to source documents. Done. In a relational database this is a join; in a document store it is a full-text guess. In a graph it is a single traversal step that returns exactly the supporting sources.</p>
+<p><strong>Multi-hop — the thing graphs are uniquely good at.</strong> "Which published posts trace back, through their drafts and source material, to the book's <em>swamp</em> metaphor?" That is a path:</p>
+<pre><code>metaphor:swamp  -same_metaphor_as-&gt;  source_document
+                -grounds-&gt;           candidate_post
+                -published_as-&gt;       observed_post
+</code></pre>
+<p>Three hops across three edge types. In SQL this is three joins you have to write correctly and tune; in a graph query language it is a path pattern you describe once. The deeper the chain of relationships, the more decisively graph traversal beats repeated joins — both in how the query reads and in how it performs, because the graph stores the connections directly instead of recomputing them at query time.</p>
+<p><strong>Pattern matching.</strong> Graph query languages (Cypher for property graphs, SPARQL for RDF) let you describe a <em>shape</em> and ask the graph to find every place that shape occurs: "find every <code>candidate_post</code> that has <strong>no</strong> <code>grounds</code> edge" — i.e. drafts with no source backing, which the content policy here would flag. That "find the missing edge" query is exactly how this repo detects ungrounded content, and it is trivial on a graph and miserable on a folder of files.</p>
+<p>This repo wraps traversal in a question-answering interface (<code>scripts/ask_graph.py</code>, run via <code>./ask_graph.sh</code>). It retrieves the relevant nodes and their neighbours and feeds them to a model to answer in plain language — a small example of <strong>GraphRAG</strong>, where graph structure decides <em>which</em> context to retrieve before a model answers. The graph is the retrieval index; its edges tell the system what is relevant to what.</p>
+<hr>
+<h2 id="9-graph-analytics-the-structure-is-itself-an-answer">9. Graph analytics: the structure is itself an answer</h2>
+<p>Because relationships are explicit, you can run algorithms over the <em>shape</em> of the graph and learn things no single file contains. This is where a knowledge graph stops being a fancy database and becomes an instrument. The repo's <code>GRAPH_REPORT.md</code> is a tour of the four most important techniques.</p>
+<p><strong>Degree centrality — the "god nodes."</strong> Count each node's edges; the most-connected nodes are your core abstractions. Here the top of the list is:</p>
+<pre><code>1. Bad News is Data                          31 edges
+2. You Can Write a Book (Fringe Show)        24 edges
+3. Delivering the Impossible (Book)          21 edges
+8. Deliver the Possible Not the Fantasy      15 edges
+</code></pre>
+<p>Nobody declared "Bad News is Data" the centre of this body of work. The graph <em>discovered</em> it, because that concept connects to more things than anything else. Degree centrality turns "what is this corpus actually about?" into a sort.</p>
+<p><strong>Betweenness centrality — the bridges.</strong> A different question: which nodes sit <em>between</em> otherwise-separate clusters, so that removing them would fragment the graph? The report flags <code>Bad News is Data</code> again with high betweenness (0.055), noting it "connects PM Truth-Telling to Writing Craft, Published Posts, Project Delivery Realism, and Value Streams." Bridge nodes are strategically precious: they are the ideas that tie distinct themes together, and they are exactly what you want to lead with when you need one message to span audiences. High-degree tells you what is <em>central</em>; high-betweenness tells you what is <em>connective</em>. They are not the same, and the difference matters.</p>
+<p><strong>Community detection — the emergent clusters.</strong> Algorithms group densely-interlinked nodes into communities. The report finds 56, including "PM Truth-Telling &amp; Bad News" (69 nodes), "Symmetrical Thinking &amp; Bi-Logic" (63), "Writing Craft &amp; Creative Voice" (72), and tight little clusters like "Projects as Romance" (8). These are <em>emergent</em> themes — the algorithm grouped them from connection density, not from anyone's folder structure. Each community also reports a <strong>cohesion</strong> score; a cohesion of 1.0 on a two-node "community" is a hint that it is too small to be meaningful, while a large community with low cohesion may be a catch-all that wants splitting.</p>
+<p><strong>Knowledge gaps — the absences.</strong> The most counterintuitive analytic is what is <em>not</em> there. The report lists <strong>276 isolated nodes</strong> with one connection or none, and flags "thin communities." An isolated node usually means one of two things: a genuinely orphaned piece of content (source material that never became a post — one of the exact questions the schema set out to answer), or a <em>missing edge</em> the extractor failed to find. Either way it is actionable. A graph lets you query for absence, and absence is frequently the most useful thing you can know.</p>
+<p>The lens to keep: in a knowledge graph, <strong>the topology is data.</strong> Centrality, bridges, clusters, and holes are answers you can compute, not opinions you have to defend.</p>
+<hr>
+<h2 id="10-inference-hyperedges-and-the-trust-problem">10. Inference, hyperedges, and the trust problem</h2>
+<p>Two more advanced features in this repo's semantic layer are worth understanding because they show where graphs are heading.</p>
+<p><strong>Inferred edges.</strong> Beyond what is written down, the model proposes connections it reasons must exist — for example <code>Embedded PM vs Reporter Dichotomy</code> <em>semantically_similar_to</em> <code>PM as Interface</code>, drawn between a reply candidate and a published reply that never reference each other directly. These are powerful: they surface the "surprising connections you didn't know" the report advertises. They are also the riskiest edges in the graph, which is why every one is tagged <code>INFERRED</code> with a confidence score, and why the report explicitly generates verification questions. The principle: <strong>inference is welcome, but it must be quarantined and labelled, never silently mixed with fact.</strong></p>
+<p><strong>Hyperedges.</strong> A normal edge connects exactly two nodes. A <strong>hyperedge</strong> connects a <em>group</em>. The report's "Bad News Handling: PM Replies Cluster" ties together four replies and four concepts as one named relationship. Some real-world relationships are genuinely n-ary — "these six files form the Graph Build-Query-Edit Pipeline" — and forcing them into pairwise edges loses the fact that they act as a set. Most property-graph tools fake hyperedges by introducing an intermediate node that everything links to; the idea is the same: relationships are not always binary.</p>
+<p>The unifying theme of this section is <strong>trust</strong>. The more a graph infers, the more it can tell you and the more it can mislead you. The whole apparatus of confidence scores, EXTRACTED-vs-INFERRED labels, and auto-generated "is this real?" questions exists to manage that trade-off. A knowledge graph you cannot audit is not knowledge; it is a confident-sounding guess.</p>
+<hr>
+<h2 id="11-two-models-youll-meet-property-graphs-and-rdf">11. Two models you'll meet: property graphs and RDF</h2>
+<p>You will encounter two dominant ways to implement a knowledge graph. They are more alike than the tribal arguments suggest.</p>
+<p><strong>Property graphs</strong> (Neo4j, Memgraph, and the model this repo uses). Nodes and edges both carry arbitrary key/value properties. Edges have a type and a direction. The query language is usually <strong>Cypher</strong>, whose <code>()-[]-&gt;()</code> syntax is literally the <code>(from)-[EDGE]-&gt;(to)</code> notation in <code>graph_schema.md</code>. Property graphs are pragmatic, ergonomic for application developers, and excellent when relationships need their own attributes (like the <code>weight</code> and <code>evidence</code> on every edge here).</p>
+<p><strong>RDF / triple stores</strong> (the W3C semantic-web stack). Everything is a triple: subject–predicate–object, where each element is a globally unique URI. Schemas are expressed in <strong>RDFS/OWL</strong> ontologies, and the query language is <strong>SPARQL</strong>. RDF's superpower is <em>interoperability</em>: because identifiers are global URIs, separate organisations' graphs can be merged and reasoned over together, which is why RDF underpins large public knowledge bases like Wikidata. Its cost is more ceremony for everyday application work.</p>
+<p>Rule of thumb: reach for a <strong>property graph</strong> when you are building one application and want relationships with rich attributes; reach for <strong>RDF</strong> when you need to publish, merge, or reason across data from many independent sources using shared vocabularies. The conceptual core — typed, directed relationships between identified things — is identical. The differences are about identifiers, standards, and tooling, not about what a knowledge graph fundamentally <em>is</em>.</p>
+<p>It is also worth knowing how graphs and vector embeddings relate, because the two are increasingly combined. Embeddings capture <em>fuzzy similarity</em> ("these two paragraphs feel related"); graphs capture <em>precise, named, traversable structure</em> ("this draft was <code>published_as</code> that post"). This repo already blends them: deterministic edges give exact structure, while the semantic layer's <code>semantically_similar_to</code> edges are embedding-style similarity promoted into explicit, inspectable edges. The frontier of practical AI retrieval — GraphRAG — is exactly this marriage: use embeddings to find candidates, use the graph to find <em>what is connected to them</em>, and feed both to a model.</p>
+<hr>
+<h2 id="12-designing-your-own-a-short-opinionated-checklist">12. Designing your own: a short, opinionated checklist</h2>
+<p>If you take one workflow from this course, take this order of operations. It is the order this repo implicitly followed.</p>
+<ol>
+<li><strong>Write the questions first.</strong> This graph began with a literal list of questions in <code>graph_schema.md</code> ("what grounds this post?", "what's overused?", "what never shipped?"). Your ontology should be the <em>minimum structure that answers your questions</em> — nothing more. Design from the questions backward, never from the data forward.</li>
+<li><strong>Define a small ontology.</strong> List your node types and edge types, give each a one-line definition, and stop. Resist the urge to model everything. You can always extend; you can rarely simplify a vocabulary people have already used inconsistently.</li>
+<li><strong>Fix identity early.</strong> Decide what makes two things "the same thing." Deterministic IDs (like file paths here) where you can; an explicit resolution strategy (canonical names, aliases, similarity thresholds) where you must. The fragmented <code>Delivering the Impossible</code> node is the cautionary tale.</li>
+<li><strong>Extract in layers, and record provenance.</strong> Build a cheap, reproducible deterministic skeleton first. Add semantic enrichment on top. Stamp every edge with how you know it — rule, source span, or model-and-confidence — and never blur fact and inference.</li>
+<li><strong>Mind the combinatorics.</strong> The 596 <code>same_channel_as</code> edges are a warning: "link everything that shares attribute X" is O(n²) and can bury your signal. Prefer edges that mean something specific over edges that merely co-occur.</li>
+<li><strong>Make it rebuildable and diffable.</strong> NDJSON, one object per line, regenerated from source rather than hand-maintained, committed to git. A graph you can rebuild from scratch is a graph you can trust, test, and evolve.</li>
+<li><strong>Then mine the structure.</strong> Run centrality, community detection, and gap analysis. Let the graph tell you what your corpus is about, where its bridges are, and where its holes are. That feedback — <code>Bad News is Data</code> is your centre of gravity; 276 things are orphaned — is the entire reason you built the graph instead of a folder.</li>
+</ol>
+<hr>
+<h2 id="13-when-not-to-reach-for-a-knowledge-graph">13. When <em>not</em> to reach for a knowledge graph</h2>
+<p>For balance: a knowledge graph is the wrong tool when your data is naturally tabular and your questions are aggregations ("total sales by region this quarter") — a relational database or a columnar store will be simpler and faster. It is overkill when relationships are shallow and you never traverse more than one hop. And it is premature when you have not yet articulated the relationship-shaped questions that justify the modelling cost. The graph here earns its keep because the questions are genuinely about connection — grounding, overlap, follow-on, gaps — and because those connections span many small documents. When that is your situation, a knowledge graph is not a luxury; it is the only structure that makes the questions answerable.</p>
+<hr>
+<h2 id="14-glossary">14. Glossary</h2>
+<ul>
+<li><strong>Node (vertex):</strong> a thing — entity, concept, document, person.</li>
+<li><strong>Edge (relationship):</strong> a typed, directed link between two nodes.</li>
+<li><strong>Triple:</strong> the atomic statement <em>subject–predicate–object</em>; one edge with its endpoints.</li>
+<li><strong>Property / attribute:</strong> a key/value fact stored on a node or edge.</li>
+<li><strong>Schema / ontology:</strong> the controlled vocabulary of allowed node types and edge types and their meanings.</li>
+<li><strong>Entity resolution:</strong> deciding when two records refer to the same real-world thing.</li>
+<li><strong>Provenance:</strong> the recorded origin and confidence of an edge or node.</li>
+<li><strong>Traversal:</strong> answering a question by walking edges from node to node.</li>
+<li><strong>Centrality:</strong> structural importance — degree (most connected) and betweenness (most connective/bridging).</li>
+<li><strong>Community:</strong> a densely-interconnected cluster of nodes, detected algorithmically.</li>
+<li><strong>Inferred edge:</strong> a relationship reasoned by a model rather than read from a source; must be labelled and scored.</li>
+<li><strong>Hyperedge:</strong> a single relationship that connects a group of nodes rather than a pair.</li>
+<li><strong>Property graph vs RDF:</strong> the two main implementations; property graphs (Cypher) favour rich edge attributes and application work, RDF (SPARQL) favours global identifiers and cross-source interoperability.</li>
+<li><strong>GraphRAG:</strong> retrieval that uses graph structure to choose what context to feed a language model.</li>
+</ul>
+<hr>
+<h3 id="where-to-look-next-in-this-repo">Where to look next in this repo</h3>
+<ul>
+<li><code>graph_schema.md</code> — the ontology: node types, edge types, the node record shape.</li>
+<li><code>graph/nodes.ndjson</code>, <code>graph/edges.ndjson</code> — the live deterministic graph (157 nodes, 843 edges).</li>
+<li><code>scripts/build_markdown_graph.py</code> — deterministic, rule-based extraction.</li>
+<li><code>graphify-out/GRAPH_REPORT.md</code> — the semantic layer's analytics: god nodes, communities, bridges, gaps.</li>
+<li><code>scripts/ask_graph.py</code> / <code>ask_graph.sh</code> — graph-grounded question answering (GraphRAG in miniature).</li>
+<li><code>scripts/edit_graph.py</code> / <code>graph_editor_commands.md</code> — manual edits and experiments on the generated graph.</li>
+</ul>
+<p>Read this course once for the concepts, then open those files and watch every concept appear in the wild.</p>
+</main>
+</body>
+</html>
