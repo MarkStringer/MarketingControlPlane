@@ -6,3 +6,4 @@ tmp*
 scripts/logs/
 .agent-state/
 session.log
+.ask_graph_embeddings.json
