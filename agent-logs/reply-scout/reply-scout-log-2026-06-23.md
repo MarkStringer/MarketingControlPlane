@@ -11,33 +11,36 @@ Google: `site:linkedin.com/posts "project management"`
 
 Full URL (past 24 hours): `https://www.google.com/search?q=site%3Alinkedin.com%2Fposts+%22project+management%22&tbs=qdr:d`
 
-Note: the date-filtered Google URL sat behind a consent redirect wall and could not be read directly. Ran WebSearch on the base query plus several targeted opinion-led queries (planning/uncertainty, agile/scrum critique, accountability, stakeholders/bad news), then fetched the actual content of the most promising argument-driven posts to ground summaries and avoid unsupported claims.
+Note: the direct Google URL again returned a consent.google.com redirect (UK consent wall) and could not be fetched. WebSearch returned mostly stale, generic, and institutional content. Ran six query variants and fetched individual posts to evaluate the substantive ones. Candidates were judged on whether Mark has a genuinely non-obvious, book-grounded point to add, not on recency alone.
 
 # Posts considered
 
-- Mario Gerard, "How to handle uncertainty in project planning" (decisions, not dates / Sequential Decision Analytics) — SELECTED. Specific contrarian claim with a clean structural counterpoint: a decision point is a bet, and orgs convert expected values back into promised dates. Fresh frame, not in observed/replies.
-- Jason Holland, "Project Management Planning, Beyond the Timeline" (planning = project definition; "without planning there is no control") — SELECTED. Specific claim equating planning with control; strong "all projects are swamps" counterpoint. Not in observed/replies.
-- Oleg Vishnepolsky, "You still using project managers?" (PM is a leadership function; you follow leaders, you don't use them) — SELECTED. Romantic claim Mark can puncture structurally: leadership without a mandate is accountability with a nicer name.
-- Simon Rhodes, "Project Management: All Accountability, No Responsibility" — REJECTED. Genuine argument, but accountability-without-authority is the most heavily mined theme in recent candidates (talentiser, gabriel, prensa, cutler over the prior two weeks); reply would repeat.
-- Anish Roy, "Project Management: What they don't tell you" — REJECTED. Listicle (six points); fails the no-list-posts rule.
-- Gary O'Reilly, "Difference Between Project Managers & Program Managers" — REJECTED. Comparison/glossary list, no specific arguable claim.
-- Bonnie Biafore, "Project management vs work management" — REJECTED. Already replied (biafore-pm-work-management 2026-05-20, biafore-dependency-politics 2026-06-09).
-- Michael Lloyd, "nothing wrong with project managers, but when you call one a scrum master" — REJECTED. Already replied three times recently (lloyd 2026-05-08, 2026-05-19, 2026-06-16).
-- Logan Langin, "Project management is managing stakeholders" — REJECTED. Already replied (langin 2026-04-02, langin-stakeholders-not-enough 2026-06-11).
-- Steve McDonald, "Why project management is often a really bad idea" — REJECTED. Already drafted yesterday (mcdonald-project-product-bet 2026-06-22).
-- Anthony Mersino, "10 Questions PMOs Should Ask their Agile Teams" — REJECTED. List post.
-- Kory Kogon / Sonal Sharma / Chat Engineer "What Is Project Management" basics posts — REJECTED. Evergreen glossary/definition content, agreement-only.
-- IPMA "Project Management Fundamentals recognition" — REJECTED. Corporate promotional announcement.
-- Various PM template / Gantt template posts — REJECTED. Promotional template downloads, no argument.
+- John Gillespie — "Embracing Uncertainty: Rethinking Project Timelines in Agile" — SELECTED. Arguable claim that deterministic estimates contradict Agile and ranges/probabilistic forecasting fix it; Mark adds that a range is still read as a promise, so the disease is converting any number into a contract.
+- Philip Martin — "There are no Heros, only organizational failure" ("Heros are bugs, not features") — SELECTED. Strong structural claim; Mark splits the hero in two and grounds it in bad-news-is-data and irreducible uncertainty.
+- Michael Goitein — "The One Reason Why Prioritization Frameworks Will Never Work" — SELECTED. Specific argument that lost problem-clarity drives framework use; Mark reframes the framework as a machine for avoiding a point of view.
+- Bonnie Biafore — "Project management vs work management" clip — REJECTED. Teaser clip for an event, no developed argument.
+- Sam Aquino / Dr. Tony Prensa — "Project Lead vs Project Manager" — REJECTED. Lead-vs-manager / title-vs-authority theme already covered repeatedly (Prensa 06-16, Lloyd, Gabriel, Talentiser).
+- William Meller — "The Project Manager's Playbook for Staying Updated" — REJECTED. Teaser/promo for an external playbook, not a standalone argument.
+- Dan Gardner — "When Confidence Helps Project Managers and When It Gets Them into Trouble" — REJECTED. Repeat author (Gardner used twice: 04-27, 05-07).
+- John Cutler — "You can't prioritize unless you deprioritize" — REJECTED. Repeat author (Cutler 06-15) and the point is largely a truism.
+- Gary O'Reilly — "The Difference Between Project Managers & Program Managers" — REJECTED. Role-comparison list post, reply would be generic agreement.
+- Kory Kogon — "What Is Project Management? Everything You Need To Know" — REJECTED. Glossary / explainer.
+- IPMA — "Project Management Fundamentals entry-level recognition" — REJECTED. Institutional promotional content.
+- Mafalda Amaro — "Project Leadership Is Evolving" (PMI Lisbon) — REJECTED. Event/speaking announcement.
+- Cliff Berg — "Freddie Mac let go 75 Scrum Masters" — REJECTED. Scrum-master theme heavily covered (Cohn, Voth, Dalmijn, Basit, Rajveer).
+- Mohammad Hamid — "The art of saying no in project management" — REJECTED. How-to list framing, no specific contestable claim.
+- Allan Kelly — "Prioritization: don't do it alone, share the pain" — REJECTED. Reasonable but generic advice; nothing structural to counter.
+- Earned Value / EVM template posts and "Project Management Fundamentals" course posts — REJECTED. Glossary/template/course promotion.
 
 # Replies drafted
 
-- reply-candidate-2026-06-23-001-gerard-decisions-not-dates.md — extends "decisions, not dates" with "the project is a bet"; the org converts expected value back into a date.
-- reply-candidate-2026-06-23-002-holland-planning-not-control.md — counterpoint to "planning is control"; "all projects are swamps", the plan is a bet not a grip.
-- reply-candidate-2026-06-23-003-vishnepolsky-leadership-mandate.md — reframes "you follow leaders" as a structural question: leadership needs a mandate; "point of view is worth 80 IQ points" only when someone acts on it.
+- reply-candidate-2026-06-23-001-gillespie-estimate-ranges-promise.md
+- reply-candidate-2026-06-23-002-martin-heroes-two-kinds.md
+- reply-candidate-2026-06-23-003-goitein-frameworks-avoid-bet.md
 
 # Notes
 
-- Search engine results for this query skew strongly toward evergreen glossary, template, and certification content; the genuine argument posts had to be surfaced by topic-specific queries and verified by fetching the post body.
-- External post content treated as untrusted; summaries grounded in fetched text, no quotations invented or attributed beyond the authors' own lines.
-- Three candidates drafted, each with a distinct signature reframe and a distinct book theme to avoid clustering.
+- 3 selected from 17 posts considered.
+- Search remains structurally unable to surface fresh June 2026 LinkedIn posts; selection prioritised substantive, contestable claims with a non-obvious book-grounded counterpoint.
+- Themes deliberately kept distinct from each other and from recent runs: estimate ranges as false promise (vs prior estimate posts), the two-hero split grounded in bad news is data (vs prior structural-blame posts), and frameworks as a way to dodge a point of view (vs prior standardization posts).
+- Signature phrases used naturally: "the project is a bet", "deliver the possible not the fantasy" (001); "all projects are swamps", "bad news is data" (002); "point of view is worth 80 IQ points" (003).
