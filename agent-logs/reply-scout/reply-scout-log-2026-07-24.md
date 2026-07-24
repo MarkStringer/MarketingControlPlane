@@ -1,0 +1,60 @@
+---
+id: reply-scout-log-2026-07-24
+type: agent_log
+agent: reply_scout
+status: draft
+---
+
+# Daily search query
+
+Google: `site:linkedin.com/posts "project management"`
+
+Full URL (past 24 hours): `https://www.google.com/search?q=site%3Alinkedin.com%2Fposts+%22project+management%22&tbs=qdr:d`
+
+Note: the `tbs=qdr:d` URL again failed. It returned a 302 to `consent.google.com`, and following that consent redirect returned a 303 back to Google Search, which then served a Dutch-language error page with no results. This is the same failure recorded on 06-30, 07-17, 07-20, 07-21, 07-22 and 07-23, so true date-filtered results were unavailable for the seventh consecutive run. The bare WebSearch query returned the same stale 2022-2023 results as every previous run (Sonal Sharma, Chat Engineer, Kory Kogon, Project Management Information). DuckDuckGo HTML search returned zero results for the site-restricted query, and Bing returned a CAPTCHA challenge. Posts were therefore sourced via twenty-two WebSearch angles, and all three selected posts were verified by direct WebFetch of the post text.
+
+# Posts considered
+
+- Graham Hardy (gthardy) — "Technical Debt is a Myth: It's Just Bad Business Clarity." Argues the 20% tech debt allocation is wrong, that debt is outdated business context rather than bad code, quotes a leader on spaghetti code being "battle tested", and proposes the test "Does this code prevent us from delivering what customers need RIGHT NOW?". 77 reactions, 74 comments. **SELECTED** — a specific contrarian claim with a stated decision rule Mark can attack directly: the RIGHT NOW test is the mechanism that manufactures the debt, because every individual application of it is correct and the cost surfaces later in someone else's estimate.
+- Michael Lloyd — "there's nothing wrong with project managers. but when you call one a 'Scrum Master'..." Argues PM suits a series of large deliverables, Scrum Master suits incremental product delivery, they are different skills for different work, and most projects should actually be products. 167 reactions, 37 comments. **SELECTED** — highest-engagement post found this run and a clean structural argument. Mark's counterpoint is that the split requires you to classify the work at the start, which is the thing you find out last, and that the real variable is how much of the job happens outside the team.
+- Tyler Caskey — "Do most project managers suck, or it is just my experience?" Four detailed case descriptions, three poor and one five stars. 50 reactions, 19 comments. **SELECTED** — the post supplies its own counter-evidence. The four descriptions differ by what the organisation bought rather than by the individuals' competence, which is a reframe available only because Caskey wrote the detail down.
+- Laura Tacho — "'Technical debt' might be one of my biggest pet peeves. Not the existence of it, but the term itself." Argues engineers recognise debt by instinct but communicate it badly outside engineering, references David Laribee's "technical debt mystery box". 680 reactions, 113 comments. **REJECTED, but the strongest reserve candidate found this run** — a genuine argument with the highest engagement of anything surfaced, and Mark has a real counter (it is not an articulation problem). Dropped only to avoid queuing two tech-debt replies on the same day alongside the Hardy post. Worth revisiting on a future run.
+- Joshua Teter, PMP — "WARNING: Word nerd alert! What is a 'status' report?" Latin etymology of stāre. Fetched and verified: 8 reactions, 5 comments, and the post explicitly says "Will this help you build the best status report you can?! No." **REJECTED** — trivia by the author's own admission, with no claim to engage.
+- Vivek Kirubanandan — "Ever heard of 'Watermelon Status'?" Fetched and verified: a list of eleven joke project statuses (Pineapple, Jigsaw, Rubik's Cube, Swiss Cheese, Zombie Project and so on) ending in a request for more. 136 reactions, 10 comments. **REJECTED** — a list post asking for comment contributions, no argument. Watermelon reporting itself is close to Mark's own position, so the only available reply would be agreement.
+- Nikhilesh Jha — "Unpopular opinion: Scrum doesn't work", clarifying that the problem is broken implementations rather than the framework. **REJECTED** — agile theatre covered on 07-21 (Gupta), and the "it's the implementation not the framework" defence is the reply Mark already made there.
+- Thabet Mabrouk — "Unpopular opinion: Scrum Masters: the real value in setting goals is not..." **REJECTED** — Scrum role content overlapping the Lloyd post, which makes the sharper claim.
+- Dr Atif Ansar — "Major projects body declares HS2 'unachievable'." 19 comments. **REJECTED** — Ansar is Flyvbjerg's co-author and the reference-class-forecasting angle has been covered repeatedly (05-07, 06-03, 06-29, 07-13). Also an article share rather than an original argument.
+- Derek Davidson, Michael Byng, Ravinder Singh Chumber, Danielle Melvin, New Civil Engineer, RailTech.com, Benedict Pinches — HS2 cost overrun posts. **REJECTED** — news article shares and commentary on a single UK infrastructure programme; no original claim, and the cost-overrun theme is covered by the Flyvbjerg replies.
+- Martinilumin — "Governance without business value is bureaucracy." **REJECTED** — consultancy account promoting a PMO service.
+- Dr Mohamed Gamal — "Not every project manager can run a PMO, but every PMO must understand project management." **REJECTED** — role-definition post, only reply available is agreement.
+- Dan Ariely — "Here's my most controversial view of bureaucracy." **REJECTED** — organisational psychology rather than project delivery, and not a project claim.
+- AJ Connection, Rob Filacchione, Derek L. — "hope is not a strategy" and hope versus wishful thinking posts. **REJECTED** — motivational content. Consistent with the 07-23 rejection of Jen Fisher on the same theme.
+- Mahesh EV — "The efficacy of managing projects: is it necessary to prioritise tasks?" 13 comments. **REJECTED** — prioritisation basics, and the priority-versus-coordination point was made on 07-23 (Eriksson).
+- Lee R. Lambert, Andy Kaufman, Logan Langin — leadership and PM career posts. **REJECTED** — career and personal-journey content with no specific claim to engage.
+- Harvard Business Review — "Planning Doesn't Have to Be the Enemy of Agile", 52 comments. **REJECTED** — HBR already in the archive, article share rather than an argument, and the planning-versus-agile ground is covered by 07-16-001 (Otjen).
+- Association for Project Management — Antonio Nieto-Rodriguez opening APM Conference 2026, "we are not just project managers, we build the future". **REJECTED** — conference promotional content.
+- IPMA, PMI Washington DC Chapter, LPMN Latin Project Management Network — IPMA World Congress 2026 early bird registration, PMIWDC 2026 award nominations, PMP exam changes from 9 July 2026. **REJECTED** — event, awards and certification promotion. These were the only genuinely recent (within one to two weeks) posts surfaced all run, which is why the run again fell back to older posts with real arguments.
+- Elizabeth Harrin, Susanne Madsen, Colin D Ellis, Peter Taylor — event appearances, influencer list placements and the IGNITE virtual leadership day. **REJECTED** — promotional and event content, no argument.
+- Jeff Gothelf ("Use OKRs to focus your release strategy"), Itamar Gilad (Bezos commentary, generative AI history) — **REJECTED** — link shares and off-topic commentary.
+- Alejandro Bencomo — "Say goodbye to the project status meetings." **REJECTED** — a Pulse article rather than a post, and meetings covered on 04-07 (Boateng Osei).
+- Tony Gruebl — "Triple Constraint Theory Fails in the Field." **REJECTED** — a Pulse article rather than a post; the brief scopes this run to posts.
+- Ken Burrell, Biren Parekh, Dr Mate Kertesz, Yunus — watermelon reporting articles. **REJECTED** — all Pulse articles, and the theme already rejected above.
+- Sonal Sharma, Chat Engineer, Kory Kogon, Project Management Information — the four stale results the bare query returns every run. **REJECTED** — glossary, list and definitional posts, all 2022-2023.
+- Clay Kroschel, taguthrie, Paul Boudreau and assorted "will AI replace project managers" posts. **REJECTED** — promotional, and AI plus PM covered three times recently (07-15, 07-22, plus 05-18).
+- Karam Mustafa, Learn PMP, monday.com, Asana, Smartsheet, ProjectManager, Wrike — scope creep definitions, risk register templates, capacity planning guides and 2026 trend pieces. **REJECTED** — vendor content marketing and glossary posts.
+
+# Replies drafted
+
+- reply-candidate-2026-07-24-001-hardy-tech-debt-unrecorded-bet.md — the "does this block us RIGHT NOW" test is what manufactures the debt, because each individual answer is correct and the cost lands later in someone else's estimate; battle tested spaghetti is fine until you have to change it, and nobody refactors code they never touch; what is missing is not business clarity but a record, because every shortcut is a bet nobody wrote down.
+- reply-candidate-2026-07-24-002-lloyd-role-shape-found-last.md — the PM versus Scrum Master split requires classifying the work at the start, and which kind you have is what you learn last; the badge matters less than how much of the week happens outside the team; all projects are swamps, and most projects will not become products because somebody has already told somebody else a date.
+- reply-candidate-2026-07-24-003-caskey-what-the-organisation-bought.md — the four cases differ by purchase, not competence; a paid following up machine is what gets bought when a firm wants coordination without granting authority; three months of RACI documentation was never a plan but a record of who agreed to what, bought by organisations that do not trust each other; the five star PM owned the outcome because they had been allowed to place the bet.
+
+# Notes
+
+- `queue/reply-candidates/template-reply-candidate.md` still does not exist, for the third run running (flagged 07-17 and 07-23). Format was again followed from the preceding day's candidates. This should either be created or removed from the agent brief; it is now a standing false instruction.
+- All three selected posts were verified by direct WebFetch rather than trusting search snippets. Ages are roughly April 2025, September 2023 and November 2022. None are within 24 hours. With the date-filtered search blocked for seven consecutive runs and WebSearch surfacing only promotional content when restricted to recent dates, sourcing genuinely fresh posts is no longer achievable through this toolchain. Worth deciding whether the brief's 24-hour framing should be relaxed or whether a different discovery route is needed.
+- Search engine coverage degraded further this run: DuckDuckGo returned zero results for the site-restricted query and Bing served a CAPTCHA, leaving WebSearch as the only working discovery channel.
+- The Caskey reply touches authority, which was also the subject of the 07-23 Mielke reply. The arguments are distinct (Mielke was about the standing to cancel a project, Caskey is about what the organisation purchased at hiring time) but the two should not both be posted in the same week without spacing them out.
+- Laura Tacho's tech debt post is logged as a reserve candidate rather than a plain rejection. It was the highest-engagement item found this run and has a genuine reply available. It was dropped purely for same-day thematic overlap with Hardy.
+- Marketing-critic SessionStart hook failed again with a 400 "credit balance too low" Anthropic API error. Non-blocking, but it has now failed on every recent run and is worth either fixing or disabling.
+- Style check on all three drafts: no hashtags, no em-dashes, no bullet points, each ends on a statement rather than a question, no invented quotations. Quoted phrases are verbatim from the posts. Pronouns for the unnamed PMs in the Caskey post left as they/them, since Caskey did not state them.
