@@ -65,7 +65,7 @@ Which brings me back to the street in Edinburgh.
 
 The one thing I found that really helped, and I've not heard many people say this, was talking about it. In 2023 I came to the Fringe without a venue and pretty much without a show. So, I gave the talk on the Meadows — the big park south of Edinburgh centre — instead. I did the "show" two or three times an afternoon, for about a week. Sometimes friends came. Sometimes nobody came. But that's where I started to sort the book out in my head.
 
-And I'm starting to think I'm doing the same thing again. But rather than just sulk, I'm talking about my stuck-ness — in a venue, a poster and a run of tickets.
+And I'm starting to think I'm doing the same thing again. But rather than just sulk, I'm talking about my stuck-ness — in a venue with a poster and a run of tickets.
 
 I only worked that out midway through the run.
 
