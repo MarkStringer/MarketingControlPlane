@@ -13,6 +13,7 @@ python3 $P/verify.py
 echo "== captions =="
 $V $P/make_srt.py   >> "$L/srt.log" 2>&1
 python3 $P/fix_srt.py > "$L/fix.log" 2>&1
+python3 $P/make_ass.py > "$L/ass.log" 2>&1
 
 echo "== 4:5 renders ==";        $V $P/render_clips.py  >> "$L/render.log" 2>&1
 echo "== 4:5 subtitle burns =="; $V $P/burn_subs.py     >> "$L/burn.log" 2>&1

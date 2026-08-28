@@ -2,12 +2,8 @@ import os, subprocess, sys
 
 SP  = "/home/mark/projects/MarketingControlPlane/scripts/clip-pipeline"
 OUT = "/home/mark/projects/MarketingControlPlane/source/show/assets/clips/shorts"
-SRT = "/home/mark/projects/MarketingControlPlane/source/show/clip-captions"
+ASS = "/home/mark/projects/MarketingControlPlane/scripts/clip-pipeline/ass/9x16"
 
-STYLE = ("FontName=DejaVu Sans,FontSize=40,Bold=1,"
-         "PrimaryColour=&H00FFFFFF&,BackColour=&HA0000000&,"
-         "BorderStyle=3,Outline=8,Shadow=0,"
-         "Alignment=2,MarginV=290,MarginL=50,MarginR=50")
 
 names = sorted(f for f in os.listdir(OUT)
                if f.endswith(".mp4") and not f.endswith("-subtitled.mp4"))
@@ -18,13 +14,13 @@ for name in names:
     if only and slug not in only:
         continue
     src = os.path.join(OUT, name)
-    srt = os.path.join(SRT, slug + ".srt")
+    srt = os.path.join(ASS, slug + ".ass")
     dst = os.path.join(OUT, name[:-4] + "-subtitled.mp4")
     if not os.path.exists(srt):
-        print("no srt for", slug); continue
+        print("no ass for", slug); continue
     if os.path.exists(dst):
         print("skip", os.path.basename(dst)); continue
-    vf = "subtitles=%s:force_style='%s'" % (srt.replace(":", r"\:"), STYLE)
+    vf = "ass=%s" % srt.replace(":", r"\:")
     r = subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", src,
                         "-vf", vf, "-c:v", "libx264", "-preset", "veryfast", "-crf", "20",
                         "-pix_fmt", "yuv420p", "-c:a", "copy", "-movflags", "+faststart", dst],
