@@ -6,3 +6,10 @@ tmp*
 scripts/logs/
 .agent-state/
 session.log
+
+# Generated media — large binaries, not committed
+source/show/assets/*.mp4
+source/show/assets/clips/
+
+scripts/clip-pipeline/logs/
+scripts/clip-pipeline/assets/
