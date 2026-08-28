@@ -15,28 +15,18 @@ os.makedirs(IMG9, exist_ok=True)
 
 FLYER = "/home/mark/projects/EdinburghShow"
 BLOG  = "/home/mark/projects/MarkStringer.github.io/assets"
-WRAP  = ("/home/mark/projects/DTI/coverStuff/"
-         "979-8-8688-2204-9_Stringer_Approved Cover.pdf")
+# The published cover wrap: back | spine | front, one page.
+# NOT the "Approved Cover" PDF in ~/projects/DTI/coverStuff - that is an earlier
+# design with AI chip, target and money icons. The published book has the skull,
+# martini glass and biscuit that the show actually refers to.
+WRAP = P + "/assets/BookCover_Full.pdf"
 
-# flyers, straight copies
-for src, dst in [(FLYER + "/flyer_a5_front.png",   IMG + "/flyer_front.png"),
-                 (FLYER + "/flyer_a5_back_v2.png", IMG + "/flyer_back.png")]:
-    Image.open(src).convert("RGB").save(dst)
-
-# photographs
-for src, dst in [(BLOG + "/mark-headshot-colour.jpg",  IMG + "/photo_headshot_colour.jpg"),
-                 (BLOG + "/mark-headshot-bw.jpg",      IMG + "/photo_headshot_bw.jpg"),
-                 (BLOG + "/MarkStringerMeOnStage.jpg", IMG + "/photo_on_stage.jpg")]:
-    Image.open(src).convert("RGB").save(dst)
-
-# book covers: the approved cover PDF is one page holding back | spine | front
 tmp = "/tmp/ycwab_wrap"
 subprocess.run(["pdftoppm", "-r", "300", "-png", "-singlefile", WRAP, tmp],
                check=True, capture_output=True)
 wrap = Image.open(tmp + ".png").convert("RGB")
-sc = wrap.width / 1949.0                      # spine edges measured at 150dpi
-wrap.crop((0, 0, int(915 * sc), wrap.height)).save(IMG + "/book_back.png")
-wrap.crop((int(1033 * sc), 0, wrap.width, wrap.height)).save(IMG + "/book_front.png")
+wrap.crop((0, 0, 1831, wrap.height)).save(IMG + "/book_back.png")      # spine edges
+wrap.crop((2066, 0, wrap.width, wrap.height)).save(IMG + "/book_front.png")
 os.remove(tmp + ".png")
 
 # pre-composite everything onto the 1080x1920 Shorts canvas so ffmpeg never rescales
