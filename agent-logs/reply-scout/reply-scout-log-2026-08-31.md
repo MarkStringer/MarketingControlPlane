@@ -40,10 +40,10 @@ worked exactly as documented and needed no WebFetch calls at all for post readin
    risk assessment, stakeholder engagement, leadership skills, conflict resolution, trend analysis,
    performance metrics, scope definition, feedback integration, predictive strategies. Post URLs
    extracted with a regex for `linkedin.com/posts/...activity-<id>`.
-3. Activity-ID decoding on all 134 distinct URLs before spending any read. **Correction to the
-   decoder recorded on earlier runs: the timestamp is the activity ID shifted right by 22 bits, not
-   23.** A shift of 23 puts every post in 1997 and 1998. Shift 22 was then confirmed exact against
-   LinkedIn's own `datePublished` structured data on all three selected posts.
+3. Activity-ID decoding on all 134 distinct URLs before spending any read, using the documented
+   `(activity_id >> 22) / 1000` shift. Confirmed exact against LinkedIn's own `datePublished`
+   structured data on all three selected posts, which is the sixth consecutive run the decoder has
+   been exact.
 4. `curl` on 9 shortlisted posts, returning 8 full bodies and 1 partial. Then `curl` again on the 3
    selected for reaction and comment counts.
 
@@ -144,10 +144,12 @@ read given it is the third most recent post reached).
 
 # Notes
 
-- **Decoder correction is the useful finding of this run.** Earlier logs describe the activity-ID
-  decoder as exact, but the shift recorded here was 23 bits, which produces dates in the late 1990s.
-  The correct shift is 22. Confirmed against LinkedIn `datePublished` on three posts, exact on all
-  three. Future runs should use `aid >> 22`.
+- **The open question from the 2026-08-25 and 2026-08-26 runs is now answered in practice.** Both
+  runs flagged that Flyvbjerg's "small is safe" post kept being rejected purely against an unposted
+  candidate from 2026-05-07, and asked whether author dedup should have a re-reply exception. This
+  run took it, on the grounds that the earlier candidate has never been posted, targets a different
+  post from 2022, and makes a different argument. If Mark disagrees with that call, candidate 001
+  is the one to drop and the rule should be written down.
 - The hub route reaches good posts and old ones. Of 134 URLs, only 5 were from the last 60 days.
   LinkedIn's top-content hubs are curated for durability, not recency, so the "past 24 hours"
   framing in the brief is not achievable through this route and has not been achievable through any
