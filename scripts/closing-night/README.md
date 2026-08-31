@@ -69,3 +69,22 @@ straddles two captions still matches. Add to `CORRECTIONS` there rather than edi
 The `CLIPS` table in `make_clips.py` is the only copy of the in and out points. The prose
 about what each clip is and why it was picked lives in
 `source/show/clip-candidates-2026-08-29.md`.
+
+## Stopping and resuming
+
+The renders take a while and it is fine to kill them. Close the laptop, Ctrl-C, power off.
+
+To pick up again, type `/resume` in Claude Code, or run it yourself:
+
+    scripts/closing-night/resume.sh
+
+It sweeps any file that was half written when the run stopped, then does only what is still
+missing. To see where things stand without starting anything:
+
+    .venv/bin/python scripts/closing-night/make_clips.py --status
+
+A lock file means only one run happens at a time; a second one exits rather than fighting
+over the same files.
+
+The source recordings are in `~/Downloads/` and are not in the repo. If they are deleted the
+clips cannot be rebuilt, and `resume.sh` will say so rather than producing broken output.

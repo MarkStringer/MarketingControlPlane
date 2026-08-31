@@ -53,11 +53,20 @@ CLIPS = [
     (17, "a-body-under-the-patio",       "A", "24:01", "25:14"),
 ]
 
-if sys.argv[1:]:
-    CLIPS = [c for c in CLIPS if c[1] in sys.argv[1:]]
+ONLY = [a for a in sys.argv[1:] if not a.startswith('-')]
+if ONLY:
+    CLIPS = [c for c in CLIPS if c[1] in ONLY]
 
 def name(n, slug):
     return "clip-%02d-%s" % (n, slug)
+
+def expected(n, slug, tin, tout):
+    """Every file this clip should end up with, and how long each should be."""
+    b, want = name(n, slug), t(tout) - t(tin)
+    return [("%s/%s.mp4" % (S916, b), want),
+            ("%s/%s-subtitled.mp4" % (S916, b), want),
+            ("%s/%s.mp4" % (S45, b), want),
+            ("%s/%s-subtitled.mp4" % (S45, b), want)]
 
 def run(args):
     r = subprocess.run(args, capture_output=True, text=True)
@@ -69,6 +78,45 @@ def dur(path):
                         "-of", "default=nw=1:nk=1", path], capture_output=True, text=True)
     try:    return float(r.stdout.strip())
     except: return 0.0
+
+def progress():
+    done = sum(1 for c in CLIPS for path, want in expected(*[c[0], c[1], c[3], c[4]])
+               if os.path.exists(path) and abs(dur(path) - want) < 1.5)
+    caps = sum(1 for c in CLIPS if os.path.exists("%s/%s.srt" % (CAPS, c[1])))
+    return done, len(CLIPS) * 4, caps, len(CLIPS)
+
+if "--status" in sys.argv:
+    d, total, c, ct = progress()
+    print("captions %d/%d   videos %d/%d" % (c, ct, d, total))
+    sys.exit(0)
+
+# --- one run at a time: a second instance would fight over the same files ---
+import fcntl
+_lock = open(HERE + "/.lock", "w")
+try:
+    fcntl.flock(_lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+except BlockingIOError:
+    print("already running; nothing to do. "
+          "Use --status to see progress.")
+    sys.exit(0)
+
+# ------------------------------------------------- 0. sweep half-written output
+# A run killed part way through (closing the laptop, Ctrl-C) leaves a truncated
+# mp4 or a partial .srt. Delete those first so the stages below rebuild them
+# instead of trusting them.
+swept = 0
+for f in os.listdir(CAPS):
+    if f.endswith(".part"):
+        os.remove(os.path.join(CAPS, f)); swept += 1
+for n, slug, src, tin, tout in CLIPS:
+    for path, want in expected(n, slug, tin, tout):
+        if os.path.exists(path) and abs(dur(path) - want) >= 1.5:
+            os.remove(path); swept += 1
+if swept:
+    print("swept %d unfinished file(s)" % swept, flush=True)
+
+d, total, c, ct = progress()
+print("starting: captions %d/%d, videos %d/%d" % (c, ct, d, total), flush=True)
 
 # ---------------------------------------------------------------- 1. cut 9:16
 def cut(job):
@@ -165,7 +213,8 @@ for n, slug, src, tin, tout in todo:
         nb[i] = max(nb[i], nb[i - 1])
     nb[-1] = len(new)
 
-    with open("%s/%s.srt" % (CAPS, slug), "w") as f:
+    tmp = "%s/%s.srt.part" % (CAPS, slug)
+    with open(tmp, "w") as f:
         i = 0
         for k, c in enumerate(cues):
             text = " ".join(new[nb[k]:nb[k + 1]]).strip()
@@ -174,6 +223,7 @@ for n, slug, src, tin, tout in todo:
             i += 1
             f.write("%d\n%s --> %s\n%s\n\n" %
                     (i, srt_time(c[0].start), srt_time(c[-1].end), wrap(text)))
+    os.replace(tmp, "%s/%s.srt" % (CAPS, slug))
 
 # ------------------------------------------------------------------- 3. .ass
 HEADER = """[Script Info]
@@ -247,4 +297,5 @@ def render(job):
 with ThreadPoolExecutor(max_workers=3) as ex:
     list(ex.map(render, render_jobs))
 
-print("done")
+d, total, c, ct = progress()
+print("done: captions %d/%d, videos %d/%d" % (c, ct, d, total))
