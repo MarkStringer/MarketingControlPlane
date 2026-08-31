@@ -5,16 +5,16 @@ nobody came and Mark performed the whole show to an empty room and recorded it.
 
 Two source files, neither in the repo:
 
-- **A** = `~/Downloads/20260829_182537.mp4` — the show, 48m 37s, 1920x1080 at 30fps
-- **B** = `~/Downloads/20260829_191832.mp4` — piece to camera afterwards, 1m 43s, 1080p120
+- **A** = `~/Downloads/20260829_182537.mp4` — the show, 48m 37s
+- **B** = `~/Downloads/20260829_191832.mp4` — piece to camera afterwards, 1m 43s
 
-Unlike the August 22/24/25 batch these are video, not voice memos, so they can be cut
-straight out rather than laid over stills. What is in frame is one man performing a full
-hour to an empty venue, which is the story rather than a problem with the footage.
+Both are portrait phone video, 1080x1920 after rotation, shot close. The show one is lit
+magenta by the stage lights in a dark room; the piece to camera is outdoors in daylight.
+It is a face filling the frame rather than a wide of a man on a stage, which suits a phone
+feed and means 9:16 needs no crop at all.
 
-Timecodes are taken from the machine transcript and are accurate to about a second. Add two
-or three seconds at the out point to catch the end of the last sentence. Quoted wording is
-indicative, not exact — the transcripts are uncorrected.
+Timecodes are the in and out points actually used, and they live in `CLIPS` in
+`scripts/closing-night/make_clips.py`. Quoted wording is from the corrected transcript.
 
 ---
 
@@ -231,21 +231,36 @@ front of clip 5.
 
 ---
 
-## Cutting them
+## The rendered files
 
-Video, so no still image needed:
+All 17 are cut, captioned and rendered. `source/show/assets/clips-2026-08-29/`, which is
+gitignored, so they exist on this machine only:
 
-```
-ffmpeg -ss 21:33 -to 23:09 -i ~/Downloads/20260829_182537.mp4 \
-  -c:v libx264 -crf 20 -preset medium -c:a aac -b:a 192k clip.mp4
-```
+    clip-NN-slug.mp4                 1080x1920, no captions
+    clip-NN-slug-subtitled.mp4       1080x1920, captions clear of the Shorts UI
+    4x5/clip-NN-slug.mp4             1080x1350, no captions
+    4x5/clip-NN-slug-subtitled.mp4   1080x1350, captions
 
-For 4:5 and 9:16, crop rather than pad if he is centred in frame. Check first:
+The slugs are, in order: `it-finally-happened`, `the-empty-room`, `im-stuck-again`,
+`stay-in-the-pool`, `why-should-i-listen-to-you`, `a-technical-term`, `a-tenth-of-an-arse`,
+`i-sulked-for-six-years`, `not-at-the-beginning`, `you-are-in-the-club`,
+`skull-not-crossbones`, `not-paul-mccartney`, `improve-your-scene`,
+`talk-your-way-out-of-it`, `come-in-the-bathroom`, `put-it-all-in-one-place`,
+`a-body-under-the-patio`.
 
-```
-ffplay -ss 21:33 ~/Downloads/20260829_182537.mp4
-```
+Captions are in `source/show/clip-captions-2026-08-29/`, which is committed. To change a
+caption, add the correction to `scripts/closing-night/corrections.py` and re-run, rather than
+editing the `.srt`, or the next run will overwrite it.
 
-`scripts/clip-pipeline/` renders 1080x1350 and 1080x1920 with burned-in captions from an
-SRT. It is built around audio over stills, so the caption and render stages are reusable but
-`render_clips.py` and `render_shorts.py` would need a video path rather than an image list.
+To change a clip's in or out point, edit `CLIPS` in `scripts/closing-night/make_clips.py`,
+delete that clip's four files, and run `scripts/closing-night/make_clips.py <slug>`.
+
+## What the footage looks like
+
+The 4:5 versions are not cropped. The phone was held close and his face fills the frame, so a
+crop would lose either the top of his head or his chin. They sit the whole portrait frame
+inside the 4:5 canvas over a blurred copy of itself instead.
+
+The stage lighting is strongly magenta and has been left as it was. Grading it out is a
+judgement call, not a fix, and it is what the room looked like. Say the word and the pipeline
+can do it in one pass.
