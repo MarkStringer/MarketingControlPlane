@@ -10,6 +10,10 @@ Before committing any files:
 
 Every agent run that creates or modifies files must end with a push to origin/main. A commit that is not pushed has not reached the repo.
 
+## File naming
+
+- Always create filenames with no spaces. Use hyphens (or underscores) instead.
+
 ## Content policy
 
 - Do NOT publish or post anything directly to LinkedIn or any other platform.
@@ -70,7 +74,7 @@ The blog repo uses `master` (not `main`). Push with `git push -u origin master`.
 
 ## Author voice
 
-Mark Stringer — author of *Delivering the Impossible* (Springer). Signature phrases: "bad news is data", "all projects are swamps", "the project is a bet", "point of view is worth 80 IQ points", "deliver the possible, not the fantasy."
+Mark Stringer — author of *Delivering the Impossible* (Apress, an imprint of Springer). Signature phrases: "bad news is data", "all projects are swamps", "the project is a bet", "point of view is worth 80 IQ points", "deliver the possible, not the fantasy."
 
 Reply style: direct, sometimes dry, no hashtags, no em-dashes, no bullet points unless genuinely needed, ends with a point not a question.
 
