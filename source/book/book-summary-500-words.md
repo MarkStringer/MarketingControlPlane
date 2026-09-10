@@ -7,7 +7,7 @@ updated: 2026-09-10
 
 # Delivering the Impossible — 500-word summary
 
-Delivering the Impossible starts from a simple observation: most software projects that fail don't fail because of bad code. They fail because of a bad way of seeing the project in the first place. Point of view is worth eighty IQ points, and most of the tools project managers reach for, the Gantt charts, the fixed scopes, the sign off meetings, quietly make people worse at seeing what is actually happening.
+Delivering the Impossible starts from a simple observation: most software projects that fail don't fail because of bad code. They fail because of a bad way of seeing the project in the first place. Point of view is worth eighty IQ points, and most of the tools project managers reach for, the detailed up-front plans, the fixed scopes, the sign off meetings, quietly make people worse at seeing what is actually happening.
 
 The book argues that every software project is really two projects running at once. There is the idea value stream, how a proposal gets attention, funding and support, and that stream is weird: ideas get backed for emotional and political reasons, not because anyone has tested them. Then there is the product value stream, the thing the team actually has to build, which does not exist yet and has to be discovered. Most of the pain in a project comes from the gap between those two streams.
 
