@@ -11,6 +11,7 @@ session.log
 source/show/assets/*.mp4
 source/show/assets/clips/
 source/youtube-transcripts/*.mp4
+source/youtube-transcripts/shorts/
 
 scripts/clip-pipeline/logs/
 scripts/clip-pipeline/assets/
