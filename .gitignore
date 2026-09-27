@@ -10,6 +10,7 @@ session.log
 # Generated media — large binaries, not committed
 source/show/assets/*.mp4
 source/show/assets/clips/
+source/youtube-transcripts/*.mp4
 
 scripts/clip-pipeline/logs/
 scripts/clip-pipeline/assets/
