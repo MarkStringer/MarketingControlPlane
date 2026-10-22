@@ -57,9 +57,9 @@ https://www.google.com/search?q=site:linkedin.com/posts+"project+management"&tbs
 
 ## Blog
 
-When asked to post something to the blog, add it to `../MarkStringer.github.io/index.markdown`.
+When asked to post something to the blog, add it to `../MarkStringer.github.io/blog.markdown`.
 
-The blog is a single-page Jekyll site. New posts are inserted as the **second** entry — after the introductory section (name, photo, and contact details, ending with the first `---` divider) but before any existing posts.
+The blog is a multi-page Jekyll site (home, book, show, novel, blog, watch, topics, about, newsletter); posts live on the blog page, `blog.markdown`, served at `/blog/`. New posts are inserted as the **first** entry — after the intro, the post-index `<script>` block and the first `---` divider, but before any existing posts. The post index at the top of the page builds itself from the posts, so it needs no edit. The home page's "From the blog" section, `topics.markdown` and `watch.markdown` are hand-maintained and do not pick up new posts.
 
 Each post follows this structure:
 1. `<a id="..."></a>` anchor
