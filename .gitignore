@@ -20,3 +20,7 @@ source/show/assets/clips-2026-08-29/
 scripts/closing-night/work/
 scripts/closing-night/run.log
 scripts/closing-night/.lock
+
+# Photos video clips
+source/photos-videos/raw/
+source/photos-videos/clips/
