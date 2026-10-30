@@ -6,6 +6,13 @@
       "first_seen": "2026-10-30",
       "status": "not-relevant",
       "reason": "1-second street clip of a restaurant sign (20261018_114822.mp4); unrelated to the subjects and under 60s"
+    },
+    "2026-10-30T16:19:24": {
+      "photo_id": "AF1QipPxw9kMHwlhyIQRCXYZIJoq-5SoAPzDLGXcpq0y",
+      "first_seen": "2026-10-30",
+      "status": "clipped",
+      "file": "source/photos-videos/raw/AF1QipPxw9kMHwlhyIQRCXYZIJoq-5SoAPzDLGXcpq0y.mp4",
+      "clips": 2
     }
   }
 }

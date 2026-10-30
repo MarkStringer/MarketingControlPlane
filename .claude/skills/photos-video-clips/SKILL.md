@@ -34,8 +34,8 @@ A video is keyed by its capture timestamp from the item's aria-label (`Video –
 11:48:24` becomes `2026-10-18T11:48:24`), because the tool output redacts some photo IDs. Also store
 the `photo_id` (the ID in its `https://photos.google.com/photo/<ID>` URL) when it is readable.
 
-`start_date` is the cutoff: only videos captured **after** that date (from the next day, 00:00)
-are ever considered new. Older videos are ignored without being listed in `videos`.
+`start_date` is the cutoff and is **inclusive**: only videos captured on or after that date are ever
+considered new. Earlier videos are ignored without being listed in `videos`.
 
 ## Steps
 
@@ -45,7 +45,7 @@ changed, use the search box and the "Videos" chip). Videos show a duration badge
 thumbnail corner. Use `read_page` / `find` to collect the `/photo/<ID>` links whose aria-label starts with `Video` (the view also shows
 photos; scroll to load more), newest first, most recent ~30 only. Compare with `seen.json`.
 
-- Ignore every video captured on or before `start_date`. Never ask about or process them.
+- Ignore every video captured before `start_date`. Never ask about or process them.
 - Any video already in `seen.json`, whatever its status (including `skipped` and `not-relevant`),
   is never downloaded, transcribed or reconsidered. Only unseen IDs go any further.
 - No unseen IDs: report "no new videos" and stop. Do not touch any files.
