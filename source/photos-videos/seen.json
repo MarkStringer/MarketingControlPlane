@@ -13,6 +13,19 @@
       "status": "clipped",
       "file": "source/photos-videos/raw/AF1QipPxw9kMHwlhyIQRCXYZIJoq-5SoAPzDLGXcpq0y.mp4",
       "clips": 2
+    },
+    "2026-11-07T07:42:57": {
+      "photo_id": "AF1QipOmXPgdK3qz6VRydpHAJmcWftcdhoZjWZwetGea",
+      "first_seen": "2026-11-07",
+      "status": "clipped",
+      "file": "source/photos-videos/raw/AF1QipOmXPgdK3qz6VRydpHAJmcWftcdhoZjWZwetGea.mp4",
+      "clips": 1
+    },
+    "2026-10-30T17:36:04": {
+      "photo_id": "AF1QipNyHVhYDmgX6t2o9QkImNfB6326WsHITUnUk0DP",
+      "first_seen": "2026-11-07",
+      "status": "not-relevant",
+      "reason": "London skyline at dusk (landscape scenery); unrelated to the subjects"
     }
   }
 }

@@ -1,0 +1,21 @@
+[00:00] So, I wrote a book and there's lots of stuff in that book and it was a huge effort for
+[00:11] me anyway to write it and now I think what I need to do is go back over it and maybe
+[00:22] read some bits out and explain what is in those bits and maybe try and encourage some
+[00:33] people to buy it. That would be great wouldn't it? And yeah, it's a foggy day here in London
+[00:44] Town and that's what I'm thinking about. Especially one of the things I'm thinking about is that
+[00:51] there was an idea that I realized was the kind of idea behind what I was writing but I never
+[00:59] kind of made it explicit which is that projects start out as being kind of essentially arguments
+[01:07] over to-do lists and how much it's going to cost for the to-do list. But if they stay there then
+[01:16] the whole thing goes a bit sterile and it doesn't really go where it needs to go. And what changes
+[01:24] everything is if you can connect to something valuable. So, this is why working software is
+[01:32] an extremely good idea. And if you can guess when it works you can get people to interact with it
+[01:37] or when you interact with it you start to understand what its real value is. And I was
+[01:47] so tied up with the idea of like seeing things from different points of view which is like one
+[01:52] of the values I would say of the book, one of the reasons it's valuable, we're talking about value
+[01:56] again, that I didn't make this explicit as a kind of single idea. But I think it's there, it's just
+[02:06] it's something that kind of very curiously people don't talk about that often. And also it's
+[02:15] how do I put this, it's kind of it's not mentioned when people are doing projects they don't talk
+[02:23] about how valuable it might be. I mean part of the reason for that is they don't really know,
+[02:30] they don't really know how it's going to be received and whether people are going to like
+[02:33] it or not. And they're kind of frightened of that. But that's why we're there, isn't it?
+[02:40] That's the whole reason for doing the thing.
