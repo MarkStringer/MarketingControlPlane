@@ -26,6 +26,38 @@
       "first_seen": "2026-11-07",
       "status": "not-relevant",
       "reason": "London skyline at dusk (landscape scenery); unrelated to the subjects"
+    },
+    "2026-11-24T06:58:48": {
+      "photo_id": "AF1QipNDaH7A9QGWopchH_rI_XANGIRexlehpIQFsjWt",
+      "first_seen": "2026-11-24",
+      "status": "clipped",
+      "file": "source/photos-videos/raw/AF1QipNDaH7A9QGWopchH_rI_XANGIRexlehpIQFsjWt.mp4",
+      "clips": 1
+    },
+    "2026-11-24T07:00:49": {
+      "photo_id": "AF1QipOJWAHQ-1oGyz2z5TVD06UAxUUy9q3-tYLZwcWO",
+      "first_seen": "2026-11-24",
+      "status": "clipped",
+      "file": "source/photos-videos/raw/AF1QipOJWAHQ-1oGyz2z5TVD06UAxUUy9q3-tYLZwcWO.mp4",
+      "clips": 1
+    },
+    "2026-11-24T06:59:20": {
+      "photo_id": "AF1QipM8hP2nObskzHhg77_3wto0q_WpuOWa2AWHoLwA",
+      "first_seen": "2026-11-24",
+      "status": "skipped",
+      "reason": "too short (0:23, under 60s)"
+    },
+    "2026-11-24T07:01:53": {
+      "photo_id": "AF1QipOcU5extQ6FdqjFjuj5idmN0RcxJuzUpS7dKoUp",
+      "first_seen": "2026-11-24",
+      "status": "skipped",
+      "reason": "too short (0:58, under 60s)"
+    },
+    "2026-11-24T07:10:14": {
+      "photo_id": "AF1QipOaT5p3UWwFjQ3CsPSGB4CljmGdd7TdQEn7nwRi",
+      "first_seen": "2026-11-24",
+      "status": "skipped",
+      "reason": "too short (0:51, under 60s)"
     }
   }
 }
